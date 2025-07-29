@@ -10,14 +10,11 @@
     Code(Expr)
 end
 
-""" 
+"""
 AbstractVerbositySpecifier{T}
 Base for types which specify which log messages are emitted at what level.
 """
 abstract type AbstractVerbositySpecifier{T} end
-
-
-
 
 # Utilities 
 
@@ -36,39 +33,40 @@ function message_level(verbose::AbstractVerbositySpecifier{true}, option, group)
 end
 
 function emit_message(
-    f::Function, verbose::V, option, group, file, line,
-    _module) where {V<:AbstractVerbositySpecifier{true}}
+        f::Function, verbose::V, option, group, file, line,
+        _module) where {V <: AbstractVerbositySpecifier{true}}
     level = message_level(
         verbose, option, group)
-        
+
     if level isa Expr
         level
     elseif !isnothing(level)
         message = f()
-        Base.@logmsg level message _file = file _line = line _module = _module
+        Base.@logmsg level message _file=file _line=line _module=_module
     end
 end
 
 function emit_message(message::String, verbose::V,
-    option, group, file, line, _module) where {V<:AbstractVerbositySpecifier{true}}
+        option, group, file, line, _module) where {V <: AbstractVerbositySpecifier{true}}
     level = message_level(verbose, option, group)
 
     if !isnothing(level)
-        Base.@logmsg level message _file = file _line = line _module = _module _group = group
+        Base.@logmsg level message _file=file _line=line _module=_module _group=group
     end
 end
 
 function emit_message(
-    f, verbose::AbstractVerbositySpecifier{false}, option, group, file, line, _module)
+        f, verbose::AbstractVerbositySpecifier{false}, option, group, file, line, _module)
 end
 
 """
-A macro that emits a log message based on the log level specified in the `option` and `group` of the `AbstractVerbositySpecifier` supplied. 
-    
-`f_or_message` may be a message String, or a 0-argument function that returns a String. 
+A macro that emits a log message based on the log level specified in the `option` and `group` of the `AbstractVerbositySpecifier` supplied.
+
+`f_or_message` may be a message String, or a 0-argument function that returns a String.
 
 ## Usage
-To emit a simple string, `@SciMLMessage("message", verbosity, :option, :group)` will emit a log message with the LogLevel specified in `verbosity`, at the appropriate `option` and `group`. 
+
+To emit a simple string, `@SciMLMessage("message", verbosity, :option, :group)` will emit a log message with the LogLevel specified in `verbosity`, at the appropriate `option` and `group`.
 
 `@SciMLMessage` can also be used to emit a log message coming from the evaluation of a 0-argument function. This function is resolved in the environment of the macro call.
 Therefore it can use variables from the surrounding environment. This may be useful if the log message writer wishes to carry out some calculations using existing variables
@@ -78,7 +76,7 @@ and use them in the log message.
 x = 10
 y = 20
 
-@SciMLMessage(verbosity, :option, :group) do 
+@SciMLMessage(verbosity, :option, :group) do
     z = x + y
     "Message is: x + y = \$z"
 end
@@ -129,12 +127,8 @@ function verbosity_to_bool(verb::Verbosity.Type)
     end
 end
 
-
-
-
-
-function SciMLLogger(; info_repl=true, warn_repl=true, error_repl=true,
-    info_file=nothing, warn_file=nothing, error_file=nothing)
+function SciMLLogger(; info_repl = true, warn_repl = true, error_repl = true,
+        info_file = nothing, warn_file = nothing, error_file = nothing)
     info_sink = isnothing(info_file) ? NullLogger() : FileLogger(info_file)
     warn_sink = isnothing(warn_file) ? NullLogger() : FileLogger(warn_file)
     error_sink = isnothing(error_file) ? NullLogger() : FileLogger(error_file)

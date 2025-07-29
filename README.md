@@ -17,6 +17,7 @@ Fine-grained control over which messages are displayed and at what levels
 Hierarchical organization of verbosity settings by component and message type
 
 Consistent logging patterns across the SciML ecosystem
+
 # Basic Usage
 
 ```julia
@@ -27,10 +28,10 @@ using Logging
 mutable struct MyVerbosityOptions
     algorithm_choice::Verbosity.Type
     iteration_progress::Verbosity.Type
-    
+
     function MyVerbosityOptions(;
-        algorithm_choice = Verbosity.Warn(),
-        iteration_progress = Verbosity.Info()
+            algorithm_choice = Verbosity.Warn(),
+            iteration_progress = Verbosity.Info()
     )
         new(algorithm_choice, iteration_progress)
     end
@@ -38,14 +39,13 @@ end
 
 struct MyVerbosity{T} <: AbstractVerbositySpecifier{T}
     options::MyVerbosityOptions
-    
+
     function MyVerbosity{T}(;
-        options = MyVerbosityOptions()
-    ) where T
+            options = MyVerbosityOptions()
+    ) where {T}
         new{T}(options)
     end
 end
-
 
 # Create enabled verbosity
 verbose = MyVerbosity{true}()
@@ -58,39 +58,40 @@ verbose = MyVerbosity{true}()
 @SciMLMessage(verbose, :iteration_progress, :options) do
     iter = 10
     total = 100
-    progress = iter/total * 100
+    progress = iter / total * 100
     "Iteration $iter/$total complete ($(round(progress, digits=1))%)"
 end
 ```
+
 # Verbosity Levels
+
 SciMLVerbosity supports several verbosity levels:
 
-- `Verbosity.None()`: No output
-- `Verbosity.Info()`: Informational messages
-- `Verbosity.Warn()`: Warning messages
-- `Verbosity.Error()`: Error messages
-- `Verbosity.Level(n)`: Custom logging level (using Julia's LogLevel(n))
-- `Verbosity.Edge()`: Special case for edge behaviors
-- `Verbosity.All()`: Maximum verbosity
-- `Verbosity.Default()`: Default verbosity settings
+  - `Verbosity.None()`: No output
+  - `Verbosity.Info()`: Informational messages
+  - `Verbosity.Warn()`: Warning messages
+  - `Verbosity.Error()`: Error messages
+  - `Verbosity.Level(n)`: Custom logging level (using Julia's LogLevel(n))
+  - `Verbosity.Edge()`: Special case for edge behaviors
+  - `Verbosity.All()`: Maximum verbosity
+  - `Verbosity.Default()`: Default verbosity settings
 
 # Creating Custom Verbosity Types
 
-1. Define a structure for each group of verbosity options
-2. Create a main verbosity struct that inherits from AbstractVerbositySpecifier{T}
-3. Define constructors for easy creation and default values
-Example:
+ 1. Define a structure for each group of verbosity options
+ 2. Create a main verbosity struct that inherits from AbstractVerbositySpecifier{T}
+ 3. Define constructors for easy creation and default values
+    Example:
 
-
-```julia 
+```julia
 # Define option groups
 mutable struct SolverOptions
     iterations::Verbosity.Type
     convergence::Verbosity.Type
-    
+
     function SolverOptions(;
-        iterations = Verbosity.Info(),
-        convergence = Verbosity.Warn()
+            iterations = Verbosity.Info(),
+            convergence = Verbosity.Warn()
     )
         new(iterations, convergence)
     end
@@ -99,10 +100,10 @@ end
 mutable struct PerformanceOptions
     timing::Verbosity.Type
     memory::Verbosity.Type
-    
+
     function PerformanceOptions(;
-        timing = Verbosity.None(),
-        memory = Verbosity.None()
+            timing = Verbosity.None(),
+            memory = Verbosity.None()
     )
         new(timing, memory)
     end
@@ -112,22 +113,22 @@ end
 struct MyAppVerbosity{T} <: AbstractVerbositySpecifier{T}
     solver::SolverOptions
     performance::PerformanceOptions
-    
+
     function MyAppVerbosity{T}(;
-        solver = SolverOptions(),
-        performance = PerformanceOptions()
-    ) where T
+            solver = SolverOptions(),
+            performance = PerformanceOptions()
+    ) where {T}
         new{T}(solver, performance)
     end
 end
 
 # Constructor with enable/disable parameter
-MyAppVerbosity(; enable = true, kwargs...) = 
-    MyAppVerbosity{enable}(; kwargs...)
+MyAppVerbosity(; enable = true, kwargs...) = MyAppVerbosity{enable}(; kwargs...)
 ```
+
 Integration with Julia's Logging System
 SciMLVerbosity integrates with Julia's built-in logging system. You can customize how logs are handled with the SciMLLogger,
-which allows you to direct logs to different outputs. Or you can use your own logger based on the Julia logging system or LoggingExtras.jl. 
+which allows you to direct logs to different outputs. Or you can use your own logger based on the Julia logging system or LoggingExtras.jl.
 
 ```julia
 # Create a logger that sends warnings to a file
@@ -144,9 +145,9 @@ with_logger(logger) do
     # Your code with @SciMLMessage calls
 end
 ```
+
 Disabling Verbosity
 To completely disable verbosity without changing your code:
-
 
 ```julia
 # Create disabled verbosity
@@ -157,4 +158,5 @@ silent = MyVerbosity{false}()
 ```
 
 # License
+
 SciMLVerbosity.jl is licensed under the MIT License.
