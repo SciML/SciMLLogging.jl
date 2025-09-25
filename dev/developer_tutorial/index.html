@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Developer Guide · SciMLLogging.jl</title><meta name="title" content="Developer Guide · SciMLLogging.jl"/><meta property="og:title" content="Developer Guide · SciMLLogging.jl"/><meta property="twitter:title" content="Developer Guide · SciMLLogging.jl"/><meta name="description" content="Documentation for SciMLLogging.jl."/><meta property="og:description" content="Documentation for SciMLLogging.jl."/><meta property="twitter:description" content="Documentation for SciMLLogging.jl."/><meta property="og:url" content="https://docs.sciml.ai/SciMLLogging/stable/developer_tutorial/"/><meta property="twitter:url" content="https://docs.sciml.ai/SciMLLogging/stable/developer_tutorial/"/><link rel="canonical" href="https://docs.sciml.ai/SciMLLogging/stable/developer_tutorial/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">SciMLLogging.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../user_tutorial/">User Guide</a></li><li class="is-active"><a class="tocitem" href>Developer Guide</a><ul class="internal"><li><a class="tocitem" href="#Overview"><span>Overview</span></a></li><li><a class="tocitem" href="#Step-1:-Design-Your-Verbosity-Interface"><span>Step 1: Design Your Verbosity Interface</span></a></li><li><a class="tocitem" href="#Step-2:-Create-Your-Verbosity-Type"><span>Step 2: Create Your Verbosity Type</span></a></li><li><a class="tocitem" href="#Step-3:-Add-Convenience-Constructors"><span>Step 3: Add Convenience Constructors</span></a></li><li><a class="tocitem" href="#Step-4:-Integrate-Messages-Into-Your-Code"><span>Step 4: Integrate Messages Into Your Code</span></a></li><li><a class="tocitem" href="#Step-5:-Export-Your-Verbosity-Type"><span>Step 5: Export Your Verbosity Type</span></a></li><li><a class="tocitem" href="#Step-6:-Document-for-Users"><span>Step 6: Document for Users</span></a></li><li class="toplevel"><a class="tocitem" href="#Default-verbosity"><span>Default verbosity</span></a></li><li class="toplevel"><a class="tocitem" href="#Custom-verbosity-show-everything-except-iterations"><span>Custom verbosity - show everything except iterations</span></a></li><li class="toplevel"><a class="tocitem" href="#Silent-mode-(no-runtime-overhead)"><span>Silent mode (no runtime overhead)</span></a></li><li><a class="tocitem" href="#Step-7:-Add-Tests"><span>Step 7: Add Tests</span></a></li><li><a class="tocitem" href="#Best-Practices"><span>Best Practices</span></a></li><li><a class="tocitem" href="#Advanced:-Custom-Log-Levels"><span>Advanced: Custom Log Levels</span></a></li><li><a class="tocitem" href="#Complete-Example"><span>Complete Example</span></a></li></ul></li><li><a class="tocitem" href="../tutorial/">Complete Examples</a></li></ul></li><li><a class="tocitem" href="../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Developer Guide</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Developer Guide</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/SciML/SciMLLogging.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/SciML/SciMLLogging.jl/blob/main/docs/src/developer_tutorial.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Developer-Tutorial:-Adding-SciMLLogging-to-Your-Package"><a class="docs-heading-anchor" href="#Developer-Tutorial:-Adding-SciMLLogging-to-Your-Package">Developer Tutorial: Adding SciMLLogging to Your Package</a><a id="Developer-Tutorial:-Adding-SciMLLogging-to-Your-Package-1"></a><a class="docs-heading-anchor-permalink" href="#Developer-Tutorial:-Adding-SciMLLogging-to-Your-Package" title="Permalink"></a></h1><p>This tutorial is for Julia package developers who want to integrate SciMLLogging.jl into their packages to provide users with fine-grained verbosity control.</p><h2 id="Overview"><a class="docs-heading-anchor" href="#Overview">Overview</a><a id="Overview-1"></a><a class="docs-heading-anchor-permalink" href="#Overview" title="Permalink"></a></h2><p>SciMLLogging.jl provides three main components for package developers:</p><ol><li><code>AbstractVerbositySpecifier{T}</code> - Base type for creating custom verbosity types</li><li><code>@SciMLMessage</code> - Macro for emitting conditional log messages</li><li>Verbosity levels - Predefined log levels (<code>Silent</code>, <code>Info</code>, <code>Warn</code>, <code>Error</code>, <code>Level(n)</code>)</li></ol><h2 id="Step-1:-Design-Your-Verbosity-Interface"><a class="docs-heading-anchor" href="#Step-1:-Design-Your-Verbosity-Interface">Step 1: Design Your Verbosity Interface</a><a id="Step-1:-Design-Your-Verbosity-Interface-1"></a><a class="docs-heading-anchor-permalink" href="#Step-1:-Design-Your-Verbosity-Interface" title="Permalink"></a></h2><p>First, decide what aspects of your package should be controllable by users. For example, a solver might have:</p><ul><li>Initialization messages</li><li>Iteration progress</li><li>Convergence information</li><li>Warning messages</li></ul><h2 id="Step-2:-Create-Your-Verbosity-Type"><a class="docs-heading-anchor" href="#Step-2:-Create-Your-Verbosity-Type">Step 2: Create Your Verbosity Type</a><a id="Step-2:-Create-Your-Verbosity-Type-1"></a><a class="docs-heading-anchor-permalink" href="#Step-2:-Create-Your-Verbosity-Type" title="Permalink"></a></h2><p>Define a struct that inherits from <code>AbstractVerbositySpecifier{T}</code>:</p><pre><code class="language-julia hljs">using SciMLLogging
+
+struct MySolverVerbosity{T} &lt;: AbstractVerbositySpecifier{T}
+    initialization::LogLevel
+    iterations::LogLevel
+    convergence::LogLevel
+    warnings::LogLevel
+
+    function MySolverVerbosity{T}(;
+        initialization = Info(),
+        iterations = Silent(),
+        convergence = Info(),
+        warnings = Warn()
+    ) where T
+        new{T}(initialization, iterations, convergence, warnings)
+    end
+end</code></pre><p><strong>Key Design Principles:</strong></p><ul><li>The type parameter <code>T</code> controls whether any logging is enabled or not: <code>T=true</code> enables messages, <code>T=false</code> disables them</li><li>Each field represents a category of messages your package can emit</li><li>Provide sensible defaults that work for most users</li><li>Use keyword arguments for flexibility</li></ul><h2 id="Step-3:-Add-Convenience-Constructors"><a class="docs-heading-anchor" href="#Step-3:-Add-Convenience-Constructors">Step 3: Add Convenience Constructors</a><a id="Step-3:-Add-Convenience-Constructors-1"></a><a class="docs-heading-anchor-permalink" href="#Step-3:-Add-Convenience-Constructors" title="Permalink"></a></h2><p>Make it easy for users to create verbosity instances:</p><pre><code class="language-julia hljs"># Default enabled verbosity
+MySolverVerbosity() = MySolverVerbosity{true}()
+
+# Boolean constructor
+MySolverVerbosity(enabled::Bool) = enabled ? MySolverVerbosity{true}() : MySolverVerbosity{false}()
+
+# Preset-based constructor (optional)
+function MySolverVerbosity(preset::VerbosityPreset)
+    if preset isa None
+        MySolverVerbosity{false}()
+    elseif preset isa All
+        MySolverVerbosity{true}(
+            initialization = Info(),
+            iterations = Info(),
+            convergence = Info(),
+            warnings = Warn()
+        )
+    elseif preset isa Minimal
+        MySolverVerbosity{true}(
+            initialization = Silent(),
+            iterations = Silent(),
+            convergence = Error(),
+            warnings = Error()
+        )
+    else
+        MySolverVerbosity{true}()  # Default
+    end
+end</code></pre><h2 id="Step-4:-Integrate-Messages-Into-Your-Code"><a class="docs-heading-anchor" href="#Step-4:-Integrate-Messages-Into-Your-Code">Step 4: Integrate Messages Into Your Code</a><a id="Step-4:-Integrate-Messages-Into-Your-Code-1"></a><a class="docs-heading-anchor-permalink" href="#Step-4:-Integrate-Messages-Into-Your-Code" title="Permalink"></a></h2><p>Use <code>@SciMLMessage</code> throughout your package code:</p><pre><code class="language-julia hljs">function my_solve(problem, verbose::MySolverVerbosity)
+    @SciMLMessage(&quot;Initializing solver for $(typeof(problem))&quot;, verbose, :initialization)
+
+    # Setup code here...
+
+    for iteration in 1:maxiters
+        # Solver iteration...
+
+        @SciMLMessage(verbose, :iterations) do
+            &quot;Iteration $iteration: residual = $(compute_residual())&quot;
+        end
+
+        if converged
+            @SciMLMessage(&quot;Converged after $iteration iterations&quot;, verbose, :convergence)
+            return solution
+        end
+
+        if should_warn_about_something()
+            @SciMLMessage(&quot;Convergence is slow, consider adjusting parameters&quot;, verbose, :warnings)
+        end
+    end
+
+    @SciMLMessage(&quot;Failed to converge after $maxiters iterations&quot;, verbose, :convergence)
+    return nothing
+end</code></pre><p><strong>Message Types:</strong></p><ul><li><strong>String messages</strong>: <code>@SciMLMessage(&quot;Fixed message&quot;, verbose, :category)</code></li><li><strong>Function messages</strong>: <code>@SciMLMessage(verbose, :category) do; &quot;Dynamic message&quot;; end</code></li></ul><p>Use function messages when:</p><ul><li>Message generation is expensive</li><li>Message includes computed values</li><li>You want lazy evaluation</li></ul><h2 id="Step-5:-Export-Your-Verbosity-Type"><a class="docs-heading-anchor" href="#Step-5:-Export-Your-Verbosity-Type">Step 5: Export Your Verbosity Type</a><a id="Step-5:-Export-Your-Verbosity-Type-1"></a><a class="docs-heading-anchor-permalink" href="#Step-5:-Export-Your-Verbosity-Type" title="Permalink"></a></h2><p>In your main module file:</p><pre><code class="language-julia hljs">module MySolver
+
+using SciMLLogging
+import SciMLLogging: AbstractVerbositySpecifier
+
+# Your verbosity type definition...
+include(&quot;verbosity.jl&quot;)
+
+# Your solver code...
+include(&quot;solver.jl&quot;)
+
+# Export the verbosity type
+export MySolverVerbosity
+
+end</code></pre><h2 id="Step-6:-Document-for-Users"><a class="docs-heading-anchor" href="#Step-6:-Document-for-Users">Step 6: Document for Users</a><a id="Step-6:-Document-for-Users-1"></a><a class="docs-heading-anchor-permalink" href="#Step-6:-Document-for-Users" title="Permalink"></a></h2><p>Provide clear documentation for your users:</p><pre><code class="language-julia hljs">&quot;&quot;&quot;
+    MySolverVerbosity{T}(; kwargs...)
+
+Controls verbosity output from MySolver functions.
+
+# Keyword Arguments
+- `initialization = Info()`: Messages about solver setup
+- `iterations = Silent()`: Per-iteration progress messages
+- `convergence = Info()`: Convergence/failure notifications
+- `warnings = Warn()`: Warning messages during solving
+
+# Constructors
+- `MySolverVerbosity()`: Default enabled verbosity
+- `MySolverVerbosity(false)`: Disabled (zero overhead)
+- `MySolverVerbosity(All())`: Enable all message categories
+- `MySolverVerbosity(Minimal())`: Only errors and convergence
+
+# Example</code></pre><p>julia</p><h1 id="Default-verbosity"><a class="docs-heading-anchor" href="#Default-verbosity">Default verbosity</a><a id="Default-verbosity-1"></a><a class="docs-heading-anchor-permalink" href="#Default-verbosity" title="Permalink"></a></h1><p>verbose = MySolverVerbosity()</p><h1 id="Custom-verbosity-show-everything-except-iterations"><a class="docs-heading-anchor" href="#Custom-verbosity-show-everything-except-iterations">Custom verbosity - show everything except iterations</a><a id="Custom-verbosity-show-everything-except-iterations-1"></a><a class="docs-heading-anchor-permalink" href="#Custom-verbosity-show-everything-except-iterations" title="Permalink"></a></h1><p>verbose = MySolverVerbosity(iterations = Silent())</p><h1 id="Silent-mode-(no-runtime-overhead)"><a class="docs-heading-anchor" href="#Silent-mode-(no-runtime-overhead)">Silent mode (no runtime overhead)</a><a id="Silent-mode-(no-runtime-overhead)-1"></a><a class="docs-heading-anchor-permalink" href="#Silent-mode-(no-runtime-overhead)" title="Permalink"></a></h1><p>verbose = MySolverVerbosity(false)</p><pre><code class="nohighlight hljs">&quot;&quot;&quot;</code></pre><h2 id="Step-7:-Add-Tests"><a class="docs-heading-anchor" href="#Step-7:-Add-Tests">Step 7: Add Tests</a><a id="Step-7:-Add-Tests-1"></a><a class="docs-heading-anchor-permalink" href="#Step-7:-Add-Tests" title="Permalink"></a></h2><p>Test your verbosity implementation:</p><pre><code class="language-julia hljs">using Test
+using MySolver
+using Logging
+
+@testset &quot;Verbosity Tests&quot; begin
+    # Test message emission
+    verbose = MySolverVerbosity()
+
+    @test_logs (:info, r&quot;Initializing solver&quot;) begin
+        my_solve(test_problem, verbose)
+    end
+
+    # Test silent mode produces no output
+    silent = MySolverVerbosity(false)
+    @test_logs min_level=Logging.Debug begin
+        my_solve(test_problem, silent)
+    end
+end</code></pre><h2 id="Best-Practices"><a class="docs-heading-anchor" href="#Best-Practices">Best Practices</a><a id="Best-Practices-1"></a><a class="docs-heading-anchor-permalink" href="#Best-Practices" title="Permalink"></a></h2><h3 id="Performance"><a class="docs-heading-anchor" href="#Performance">Performance</a><a id="Performance-1"></a><a class="docs-heading-anchor-permalink" href="#Performance" title="Permalink"></a></h3><ul><li>Always use the type parameter <code>T</code> to control whether logging is enabled or not</li><li>Use function-based messages for expensive computations</li><li>Consider message frequency - don&#39;t spam users with too many messages</li></ul><h3 id="User-Experience"><a class="docs-heading-anchor" href="#User-Experience">User Experience</a><a id="User-Experience-1"></a><a class="docs-heading-anchor-permalink" href="#User-Experience" title="Permalink"></a></h3><ul><li>Provide sensible defaults that work for most users</li><li>Use descriptive category names (<code>:initialization</code> not <code>:init</code>)</li><li>Group related messages into logical categories</li><li>Document what each category controls</li></ul><h3 id="Message-Content"><a class="docs-heading-anchor" href="#Message-Content">Message Content</a><a id="Message-Content-1"></a><a class="docs-heading-anchor-permalink" href="#Message-Content" title="Permalink"></a></h3><ul><li>Include relevant context (iteration numbers, values, etc.)</li><li>Use consistent formatting across your package</li><li>Make messages actionable when possible</li><li>Avoid overly technical jargon in user-facing messages</li></ul><h3 id="Integration"><a class="docs-heading-anchor" href="#Integration">Integration</a><a id="Integration-1"></a><a class="docs-heading-anchor-permalink" href="#Integration" title="Permalink"></a></h3><ul><li>Accept verbosity parameters in your main API functions</li><li>Consider making verbosity optional with sensible defaults</li><li>Thread verbosity through your call stack as needed</li></ul><h2 id="Advanced:-Custom-Log-Levels"><a class="docs-heading-anchor" href="#Advanced:-Custom-Log-Levels">Advanced: Custom Log Levels</a><a id="Advanced:-Custom-Log-Levels-1"></a><a class="docs-heading-anchor-permalink" href="#Advanced:-Custom-Log-Levels" title="Permalink"></a></h2><p>For specialized needs, you can create custom log levels:</p><pre><code class="language-julia hljs">struct MySolverVerbosity{T} &lt;: AbstractVerbositySpecifier{T}
+    debug::LogLevel
+    # ... other fields
+
+    function MySolverVerbosity{T}(;
+        debug = Level(-1000),  # Custom level below Info
+        # ... other defaults
+    ) where T
+        new{T}(debug, ...)
+    end
+end</code></pre><h2 id="Complete-Example"><a class="docs-heading-anchor" href="#Complete-Example">Complete Example</a><a id="Complete-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Complete-Example" title="Permalink"></a></h2><p>Here&#39;s a complete minimal example:</p><pre><code class="language-julia hljs">module ExampleSolver
+
+using SciMLLogging
+import SciMLLogging: AbstractVerbositySpecifier
+
+struct ExampleVerbosity{T} &lt;: AbstractVerbositySpecifier{T}
+    progress::LogLevel
+
+    ExampleVerbosity{T}(progress = Info()) where T = new{T}(progress)
+end
+
+ExampleVerbosity() = ExampleVerbosity{true}()
+ExampleVerbosity(enabled::Bool) = enabled ? ExampleVerbosity{true}() : ExampleVerbosity{false}()
+
+function solve_example(n::Int, verbose::ExampleVerbosity)
+    result = 0
+    for i in 1:n
+        result += i
+        @SciMLMessage(&quot;Step $i: sum = $result&quot;, verbose, :progress)
+    end
+    return result
+end
+
+export ExampleVerbosity, solve_example
+
+end</code></pre><p>This example shows the minimal structure needed to integrate SciMLLogging into a package.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../user_tutorial/">« User Guide</a><a class="docs-footer-nextpage" href="../tutorial/">Complete Examples »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Thursday 25 September 2025 16:12">Thursday 25 September 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
