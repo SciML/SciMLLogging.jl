@@ -3,14 +3,14 @@
 using Logging
 
 struct MyVerbosity{T} &lt;: AbstractVerbositySpecifier{T}
-    startup::SciMLLogging.LogLevel
-    progress::SciMLLogging.LogLevel
-    warnings::SciMLLogging.LogLevel
+    startup::MessageLevel
+    progress::MessageLevel
+    warnings::MessageLevel
 
     function MyVerbosity{T}(;
-        startup = SciMLLogging.Info(),
-        progress = SciMLLogging.Silent(),
-        warnings = SciMLLogging.Warn()
+        startup = InfoLevel(),
+        progress = Silent(),
+        warnings = WarnLevel()
     ) where T
         new{T}(startup, progress, warnings)
     end
@@ -24,18 +24,18 @@ verbose = MyVerbosity{true}()
 ┌ Warning: Memory usage high
 └ @ Main tutorial.md:52</code></pre><h2 id="Verbosity-Levels"><a class="docs-heading-anchor" href="#Verbosity-Levels">Verbosity Levels</a><a id="Verbosity-Levels-1"></a><a class="docs-heading-anchor-permalink" href="#Verbosity-Levels" title="Permalink"></a></h2><p>SciMLLogging provides several built-in verbosity levels:</p><pre><code class="language-julia hljs">using SciMLLogging
 
-SciMLLogging.Silent()  # No output
-SciMLLogging.Info()    # Informational messages
-SciMLLogging.Warn()    # Warning messages
-SciMLLogging.Error()   # Error messages
-SciMLLogging.Level(-1000)  # Custom log level with integer n</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">SciMLLogging.Level(-1000)</code></pre><h2 id="Dynamic-Messages"><a class="docs-heading-anchor" href="#Dynamic-Messages">Dynamic Messages</a><a id="Dynamic-Messages-1"></a><a class="docs-heading-anchor-permalink" href="#Dynamic-Messages" title="Permalink"></a></h2><p>Use functions for lazy evaluation of expensive message generation:</p><pre><code class="language-julia hljs">using SciMLLogging
+Silent()  # No output
+InfoLevel()    # Informational messages
+WarnLevel()    # Warning messages
+ErrorLevel()   # Error messages
+CustomLevel(-1000)  # Custom log level with integer n</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CustomLevel(-1000)</code></pre><h2 id="Dynamic-Messages"><a class="docs-heading-anchor" href="#Dynamic-Messages">Dynamic Messages</a><a id="Dynamic-Messages-1"></a><a class="docs-heading-anchor-permalink" href="#Dynamic-Messages" title="Permalink"></a></h2><p>Use functions for lazy evaluation of expensive message generation:</p><pre><code class="language-julia hljs">using SciMLLogging
 using Logging
 
 # Define the verbosity system (same as before)
 struct MyVerbosity2{T} &lt;: AbstractVerbositySpecifier{T}
-    progress::SciMLLogging.LogLevel
+    progress::MessageLevel
 
-    MyVerbosity2{T}(progress = SciMLLogging.Info()) where T = new{T}(progress)
+    MyVerbosity2{T}(progress = SciMLLogging.InfoLevel()) where T = new{T}(progress)
 end
 
 verbose = MyVerbosity2{true}()
@@ -51,9 +51,9 @@ end</code></pre><pre class="documenter-example-output"><code class="nohighlight 
 using Logging
 
 struct MyVerbosity3{T} &lt;: AbstractVerbositySpecifier{T}
-    startup::SciMLLogging.LogLevel
+    startup::MessageLevel
 
-    MyVerbosity3{T}(startup = SciMLLogging.Info()) where T = new{T}(startup)
+    MyVerbosity3{T}(startup = InfoLevel()) where T = new{T}(startup)
 end
 
 # Disabled verbosity
@@ -63,13 +63,13 @@ silent = MyVerbosity3{false}()
 @SciMLMessage(&quot;This won&#39;t be shown&quot;, silent, :startup)
 println(&quot;Message was not shown because verbosity is disabled&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Message was not shown because verbosity is disabled</code></pre><h2 id="Utility-Functions"><a class="docs-heading-anchor" href="#Utility-Functions">Utility Functions</a><a id="Utility-Functions-1"></a><a class="docs-heading-anchor-permalink" href="#Utility-Functions" title="Permalink"></a></h2><h3 id="Converting-to-Integer"><a class="docs-heading-anchor" href="#Converting-to-Integer">Converting to Integer</a><a id="Converting-to-Integer-1"></a><a class="docs-heading-anchor-permalink" href="#Converting-to-Integer" title="Permalink"></a></h3><p>For compatibility with packages using integer verbosity levels:</p><pre><code class="language-julia hljs">using SciMLLogging
 
-level = verbosity_to_int(SciMLLogging.Warn())  # Returns 2</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2</code></pre><h3 id="Converting-to-Boolean"><a class="docs-heading-anchor" href="#Converting-to-Boolean">Converting to Boolean</a><a id="Converting-to-Boolean-1"></a><a class="docs-heading-anchor-permalink" href="#Converting-to-Boolean" title="Permalink"></a></h3><p>For packages using boolean verbosity flags:</p><pre><code class="language-julia hljs">using SciMLLogging
+level = verbosity_to_int(WarnLevel())  # Returns 2</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2</code></pre><h3 id="Converting-to-Boolean"><a class="docs-heading-anchor" href="#Converting-to-Boolean">Converting to Boolean</a><a id="Converting-to-Boolean-1"></a><a class="docs-heading-anchor-permalink" href="#Converting-to-Boolean" title="Permalink"></a></h3><p>For packages using boolean verbosity flags:</p><pre><code class="language-julia hljs">using SciMLLogging
 
-is_verbose = verbosity_to_bool(SciMLLogging.Info())  # Returns true
-println(&quot;SciMLLogging.Info() converts to: $is_verbose&quot;)
+is_verbose = verbosity_to_bool(InfoLevel())  # Returns true
+println(&quot;SciMLLogging.InfoLevel() converts to: $is_verbose&quot;)
 
-is_verbose = verbosity_to_bool(SciMLLogging.Silent())  # Returns false
-println(&quot;SciMLLogging.Silent() converts to: $is_verbose&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">SciMLLogging.Info() converts to: true
+is_verbose = verbosity_to_bool(Silent())  # Returns false
+println(&quot;SciMLLogging.Silent() converts to: $is_verbose&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">SciMLLogging.InfoLevel() converts to: true
 SciMLLogging.Silent() converts to: false</code></pre><h2 id="Custom-Logger"><a class="docs-heading-anchor" href="#Custom-Logger">Custom Logger</a><a id="Custom-Logger-1"></a><a class="docs-heading-anchor-permalink" href="#Custom-Logger" title="Permalink"></a></h2><p>Route messages to different destinations:</p><pre><code class="language-julia hljs">using SciMLLogging
 using Logging
 
@@ -84,9 +84,9 @@ logger = SciMLLogger(
 
 # Define a simple verbosity system for testing
 struct LoggerTestVerbosity{T} &lt;: AbstractVerbositySpecifier{T}
-    test::SciMLLogging.LogLevel
+    test::MessageLevel
 
-    LoggerTestVerbosity{T}(test = SciMLLogging.Warn()) where T = new{T}(test)
+    LoggerTestVerbosity{T}(test = WarnLevel()) where T = new{T}(test)
 end
 
 verbose = LoggerTestVerbosity{true}()
@@ -106,14 +106,14 @@ Random.seed!(123) # For reproducibility
 
 # Create verbosity type
 struct SolverVerbosity{T} &lt;: AbstractVerbositySpecifier{T}
-    initialization::SciMLLogging.LogLevel
-    iterations::SciMLLogging.LogLevel
-    convergence::SciMLLogging.LogLevel
+    initialization::MessageLevel
+    iterations::MessageLevel
+    convergence::MessageLevel
 
     function SolverVerbosity{T}(;
-        initialization = SciMLLogging.Info(),
-        iterations = SciMLLogging.Silent(),
-        convergence = SciMLLogging.Info()
+        initialization = InfoLevel(),
+        iterations = Silent(),
+        convergence = InfoLevel()
     ) where T
         new{T}(initialization, iterations, convergence)
     end
@@ -161,9 +161,9 @@ using Test
 
 # Define a simple verbosity system for testing
 struct TestVerbosity{T} &lt;: AbstractVerbositySpecifier{T}
-    level::SciMLLogging.LogLevel
+    level::MessageLevel
 
-    TestVerbosity{T}(level = SciMLLogging.Info()) where T = new{T}(level)
+    TestVerbosity{T}(level = InfoLevel()) where T = new{T}(level)
 end
 
 @testset &quot;Verbosity Tests&quot; begin
@@ -179,4 +179,4 @@ end
     @test_logs min_level=Logging.Debug begin
         @SciMLMessage(&quot;Should not appear&quot;, silent, :level)
     end
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Test.DefaultTestSet(&quot;Verbosity Tests&quot;, Any[], 2, false, false, true, 1.758816768191714e9, 1.758816768430713e9, false, &quot;tutorial.md&quot;)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../developer_tutorial/">« Developer Guide</a><a class="docs-footer-nextpage" href="../api/">API Reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Thursday 25 September 2025 16:12">Thursday 25 September 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Test.DefaultTestSet(&quot;Verbosity Tests&quot;, Any[], 2, false, false, true, 1.758823576111837e9, 1.758823576341369e9, false, &quot;tutorial.md&quot;)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../developer_tutorial/">« Developer Guide</a><a class="docs-footer-nextpage" href="../api/">API Reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Thursday 25 September 2025 18:06">Thursday 25 September 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
