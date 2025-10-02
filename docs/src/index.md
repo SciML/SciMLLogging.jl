@@ -33,7 +33,7 @@ If you use SciMLLogging.jl in your research, please cite the SciML organization:
 
 ## Getting Started
 
-See the [Tutorial](@ref) for a quick introduction to using SciMLLogging.jl.
+See [Getting Started with SciMLLogging.jl](@ref) for a quick introduction to using SciMLLogging.jl.
 
 ## Contributing 
 

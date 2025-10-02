@@ -3,8 +3,9 @@
 const LOGGING_BACKEND = @load_preference("logging_backend", "logging")
 
 """
-AbstractVerbositySpecifier{T}
-    Base for types which specify which log messages are emitted at what level.
+    `AbstractVerbositySpecifier`
+
+Base for types which specify which log messages are emitted at what level.
     
 """
 abstract type AbstractVerbositySpecifier end
@@ -59,6 +60,8 @@ end
 
 
 """
+    `@SciMLMessage(message, verbosity, option)`
+
 A macro that emits a log message based on the log level specified in the `option` of the `AbstractVerbositySpecifier` supplied.
 
 `f_or_message` may be a message String, or a 0-argument function that returns a String.
@@ -69,19 +72,38 @@ To emit a simple string, `@SciMLMessage("message", verbosity, :option)` will emi
 
 `@SciMLMessage` can also be used to emit a log message coming from the evaluation of a 0-argument function. This function is resolved in the environment of the macro call.
 Therefore it can use variables from the surrounding environment. This may be useful if the log message writer wishes to carry out some calculations using existing variables
-and use them in the log message.
+and use them in the log message. The function is only called if the message category is not `Silent()`, avoiding unnecessary computation.
+
+The macro works with any `AbstractVerbositySpecifier` implementation:
 
 ```julia
-# String message
-@SciMLMessage("Hello", verbose, :test1)
+# Package defines verbosity specifier
+@concrete struct SolverVerbosity <: AbstractVerbositySpecifier
+    initialization
+    progress
+    convergence
+    diagnostics
+    performance
+end
 
-# Function for lazy evaluation
-x = 10
-y = 20
+# Usage in package code
+function solve_problem(problem; verbose = SolverVerbosity(Standard()))
+    @SciMLMessage("Initializing solver", verbose, :initialization)
 
-@SciMLMessage(verbosity, :option) do
-    z = x + y
-    "Sum: \$z"
+    # ... solver setup ...
+
+    for iteration in 1:max_iterations
+        @SciMLMessage("Iteration \$iteration", verbose, :progress)
+
+        # ... iteration work ...
+
+        if converged
+            @SciMLMessage("Converged after \$iteration iterations", verbose, :convergence)
+            break
+        end
+    end
+
+    return result
 end
 ```
 """
@@ -104,16 +126,28 @@ end
 
 """
         `verbosity_to_int(verb::AbstractMessageLevel)`
+
     Takes a `AbstractMessageLevel` and gives a corresponding integer value.
     Verbosity settings that use integers or enums that hold integers are relatively common.
     This provides an interface so that these packages can be used with SciMLVerbosity. Each of the basic verbosity levels
     are mapped to an integer.
 
-    - Silent() => 0
-    - InfoLevel() => 1
-    - WarnLevel() => 2
-    - ErrorLevel() => 3
-    - CustomLevel(i) => i
+    ```julia
+
+    using SciMLLogging
+
+    # Standard levels
+
+    verbosity_to_int(Silent())        # Returns 0
+    verbosity_to_int(InfoLevel())     # Returns 1
+    verbosity_to_int(WarnLevel())     # Returns 2
+    verbosity_to_int(ErrorLevel())    # Returns 3
+
+    # Custom levels
+
+    verbosity_to_int(CustomLevel(10)) # Returns 10
+    verbosity_to_int(CustomLevel(-5)) # Returns -5
+    ```
 """
 function verbosity_to_int(verb::AbstractMessageLevel)
     if verb isa Silent
@@ -133,10 +167,25 @@ end
 
 """
         `verbosity_to_bool(verb::AbstractMessageLevel)`
+        
     Takes a `AbstractMessageLevel` and gives a corresponding boolean value.
     Verbosity settings that use booleans are relatively common.
     This provides an interface so that these packages can be used with SciMLVerbosity.
     If the verbosity is `Silent`, then `false` is returned. Otherwise, `true` is returned.
+
+    ```julia
+    using SciMLLogging
+
+    # Silent returns false
+    verbosity_to_bool(Silent())        # Returns false
+
+    # All other levels return true
+    verbosity_to_bool(InfoLevel())     # Returns true
+    verbosity_to_bool(WarnLevel())     # Returns true
+    verbosity_to_bool(ErrorLevel())    # Returns true
+    verbosity_to_bool(CustomLevel(5))  # Returns true
+    ```
+
 """
 function verbosity_to_bool(verb::AbstractMessageLevel)
     if verb isa Silent
@@ -147,7 +196,7 @@ function verbosity_to_bool(verb::AbstractMessageLevel)
 end
 
 """
-    set_logging_backend(backend::String)
+    `set_logging_backend(backend::String)``
 
 Set the logging backend preference. Valid options are:
 - "logging": Use Julia's standard Logging system (default)
@@ -165,7 +214,7 @@ function set_logging_backend(backend::String)
 end
 
 """
-    get_logging_backend() -> String
+    `get_logging_backend()`
 
 Get the current logging backend preference.
 """
@@ -174,7 +223,7 @@ function get_logging_backend()
 end
 
 """
-    SciMLLogger(; kwargs...)
+    `SciMLLogger(; kwargs...)`
 
 Create a logger that routes messages to REPL and/or files based on log level.
 
