@@ -31,39 +31,42 @@ function logging_message_level(option::Silent)
 end 
 
 function emit_message(
-        f::Function, level, file, line,
+        f::Function, level, option, file, line,
         _module)
     message = f()
+    msg = "Verbosity toggle: $option \n $message"
     @static if LOGGING_BACKEND == "core"
-        Core.println(message)
+        Core.println(msg)
     else
-        Base.@logmsg level message _file=file _line=line _module=_module
+        Base.@logmsg level msg _file=file _line=line _module=_module
     end
 
     if level == Logging.Error
-        throw(ErrorException(message))
+        throw(ErrorException(msg))
     end 
 end
 
 function emit_message(message::AbstractString,
-        level, file, line, _module)
+        level, option, file, line, _module)
+
+    msg = "Verbosity toggle: $option \n $message"
     @static if LOGGING_BACKEND == "core"
-        Core.println(message)
+        Core.println(msg)
     else
-        Base.@logmsg level message _file=file _line=line _module=_module
+        Base.@logmsg level msg _file=file _line=line _module=_module
     end
 
     if level == Logging.Error
-        throw(ErrorException(message))
+        throw(ErrorException(msg))
     end 
 end
 
 function emit_message(message::AbstractString,
-    level::Nothing, file, line, _module)
+    level::Nothing, option, file, line, _module)
 end 
 
 function emit_message(
-    f::Function, level::Nothing, file, line, _module)
+    f::Function, level::Nothing, option, file, line, _module)
 end
 
 function get_message_level(verb::AbstractVerbositySpecifier, option)
@@ -146,6 +149,7 @@ macro SciMLMessage(f_or_message, verb, option)
     expr = quote
         emit_message($(esc(f_or_message)),
             get_message_level($(esc(verb)), $(esc(option))),
+            $(esc(option)),
             $file,
             $line,
             $_module)

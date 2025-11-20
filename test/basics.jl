@@ -51,9 +51,9 @@ end
 @testset "Basic tests" begin
     verbose = TestVerbosity()
 
-    @test_logs (:warn, "Test1") @SciMLMessage("Test1", verbose, :test1)
-    @test_logs (:info, "Test2") @SciMLMessage("Test2", verbose, :test2)
-    @test_logs (:error, "Test3") @test_throws "Test3" begin
+    @test_logs (:warn, r"Test1") @SciMLMessage("Test1", verbose, :test1)
+    @test_logs (:info, r"Test2") @SciMLMessage("Test2", verbose, :test2)
+    @test_logs (:error, r"Test3") @test_throws "Test3" begin
          @SciMLMessage("Test3", verbose, :test3)
     end
     @test_logs min_level = Logging.Debug @SciMLMessage("Test4", verbose, :test4)
@@ -61,7 +61,7 @@ end
     x = 30
     y = 30
 
-    @test_logs (:warn, "Test1: 60") @SciMLMessage(verbose, :test1) do
+    @test_logs (:warn, r"Test1: 60") @SciMLMessage(verbose, :test1) do
         z = x + y
         "Test1: $z"
     end
@@ -74,15 +74,15 @@ end
     verbose_none = TestVerbosity(None())
 
     # All preset should log info level messages
-    @test_logs (:info, "All preset test") @SciMLMessage("All preset test", verbose_all, :test1)
+    @test_logs (:info, r"All preset test") @SciMLMessage("All preset test", verbose_all, :test1)
 
     # Minimal preset should only log errors and throw for error messages
-    @test_logs (:error, "Minimal preset test") @test_throws ErrorException("Minimal preset test") begin
+    @test_logs (:error, r"Minimal preset test") @test_throws ErrorException("Verbosity toggle: test1 \n Minimal preset test") begin
        @SciMLMessage("Minimal preset test", verbose_minimal, :test1)
     end
 
     # Test that minimal preset throws for test3 (which is ErrorLevel)
-    @test_logs (:error, "Minimal error on test3") @test_throws ErrorException("Minimal error on test3") begin
+    @test_logs (:error, r"Minimal error on test3") @test_throws ErrorException("Verbosity toggle: test3 \n Minimal error on test3") begin
         @SciMLMessage("Minimal error on test3", verbose_minimal, :test3)
     end
 
@@ -107,7 +107,7 @@ end
     verbose = TestVerbosity()
 
     # Test that @SciMLMessage can be called inside another @SciMLMessage function block
-    @test_logs (:warn, "Inner message from nested call") (:info, "Outer message with nested result") begin
+    @test_logs (:warn, r"Inner message from nested call") (:info, r"Outer message with nested result") begin
         result = @SciMLMessage(verbose, :test2) do
             @SciMLMessage("Inner message from nested call", verbose, :test1)
             "Outer message with nested result"
@@ -116,7 +116,7 @@ end
 
     # Test nested with both function-based inner and outer
     counter = 0
-    @test_logs (:info, "Inner computation: 5") (:warn, "Outer result: 5") begin
+    @test_logs (:info, r"Inner computation: 5") (:warn, r"Outer result: 5") begin
         @SciMLMessage(verbose, :test1) do
             inner_result = @SciMLMessage(verbose, :test2) do
                 counter = 5
@@ -129,13 +129,13 @@ end
 
 @testset "Boolean verbosity" begin
     # Test with true - should emit at WarnLevel (three-arg form)
-    @test_logs (:warn, "Message with verbose=true") @SciMLMessage("Message with verbose=true", true, :ignored)
+    @test_logs (:warn, r"Message with verbose=true") @SciMLMessage("Message with verbose=true", true, :ignored)
 
     # Test with false - should not emit anything (three-arg form)
     @test_logs min_level = Logging.Debug @SciMLMessage("Message with verbose=false", false, :ignored)
 
     # Test with function form and true (three-arg form)
-    @test_logs (:warn, "Computed message: 42") @SciMLMessage(true, :ignored) do
+    @test_logs (:warn, r"Computed message: 42") @SciMLMessage(true, :ignored) do
         x = 40 + 2
         "Computed message: $x"
     end
@@ -149,13 +149,13 @@ end
     @test !computation_ran  # Verify function was never called when verbose=false
 
     # Test two-argument form with true
-    @test_logs (:warn, "Two-arg form with true") @SciMLMessage("Two-arg form with true", true)
+    @test_logs (:warn, r"Two-arg form with true") @SciMLMessage("Two-arg form with true", true)
 
     # Test two-argument form with false
     @test_logs min_level = Logging.Debug @SciMLMessage("Two-arg form with false", false)
 
     # Test two-argument form with function and true
-    @test_logs (:warn, "Two-arg computed: 100") @SciMLMessage(true) do
+    @test_logs (:warn, r"Two-arg computed: 100") @SciMLMessage(true) do
         y = 50 * 2
         "Two-arg computed: $y"
     end
