@@ -264,7 +264,7 @@ version = "0.7.0"
 
 [[deps.SciMLLogging]]
 deps = ["Logging", "LoggingExtras", "Preferences"]
-path = "/home/runner/work/SciMLLogging.jl/SciMLLogging.jl"
+path = "/home/chrisrackauckas/github-runners/deepsea4-9/_work/SciMLLogging.jl/SciMLLogging.jl"
 uuid = "a6db7da4-7206-11f0-1eab-35f2a5dbe1d1"
 version = "1.5.0"
 
