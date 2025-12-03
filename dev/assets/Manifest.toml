@@ -2,7 +2,7 @@
 
 julia_version = "1.12.2"
 manifest_format = "2.0"
-project_hash = "55a87589fd1830dad68c0907967a1615a6317f41"
+project_hash = "e237e5fcf2e3f912106f551e744644ce2c8ee0d7"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -264,7 +264,7 @@ version = "0.7.0"
 
 [[deps.SciMLLogging]]
 deps = ["Logging", "LoggingExtras", "Preferences"]
-path = "/home/chrisrackauckas/github-runners/demeter4-22/_work/SciMLLogging.jl/SciMLLogging.jl"
+path = "/home/runner/work/SciMLLogging.jl/SciMLLogging.jl"
 uuid = "a6db7da4-7206-11f0-1eab-35f2a5dbe1d1"
 version = "1.6.0"
 
