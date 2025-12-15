@@ -10,16 +10,26 @@ AbstractVerbositySpecifier
 
 ## Creating Verbosity Specifiers
 
-Package authors typically define their own verbosity specifier types by subtyping `AbstractVerbositySpecifier`. Each field in the struct represents a different category of messages that can be controlled independently.
+Package authors can define their own verbosity specifier types in two ways:
 
-### Example Implementation
+### Using the `@verbosity_specifier` Macro (Recommended)
+
+The `@verbosity_specifier` macro automatically generates a parametric struct with constructors, presets, and group support:
+
+```@docs
+@verbosity_specifier
+```
+
+### Manual Implementation
+
+Alternatively, you can manually define verbosity specifier types by subtyping `AbstractVerbositySpecifier`:
 
 ```julia
 using SciMLLogging
 using ConcreteStructs: @concrete
 
 @concrete struct MyPackageVerbosity <: AbstractVerbositySpecifier
-    initialization    # Controls startup and setup messages
+    initialization   # Controls startup and setup messages
     progress         # Controls progress and iteration updates
     convergence      # Controls convergence-related messages
     diagnostics      # Controls diagnostic messages
@@ -27,13 +37,12 @@ using ConcreteStructs: @concrete
 end
 ```
 
-### Using the `@concrete` Macro
-
-The `@concrete` macro from ConcreteStructs.jl is recommended for performance reasons:
+**Note:** It is recommended that the verbosity specifier is concretely typed for several performance reasons:
 
 - **Type stability**: Eliminates type instabilities that can hurt performance
 - **Compile-time optimization**: Allows the compiler to generate more efficient code
-- **Zero-cost abstraction**: Disabled verbosity ideally incurs no runtime 
+
+The `@concrete` macro from ConcreteStructs.jl is a convenient way to automate that. 
 
 ## Configuring Message Categories
 

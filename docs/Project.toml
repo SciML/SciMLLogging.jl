@@ -6,4 +6,4 @@ SciMLLogging = "a6db7da4-7206-11f0-1eab-35f2a5dbe1d1"
 [compat]
 ConcreteStructs = "0.2.3"
 Documenter = "1"
-SciMLLogging = "1.6.0"
+SciMLLogging = "1.7.1"
