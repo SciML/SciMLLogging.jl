@@ -9,4 +9,4 @@ SciMLLogging = {path = "/home/runner/work/SciMLLogging.jl/SciMLLogging.jl"}
 [compat]
 ConcreteStructs = "0.2.3"
 Documenter = "1"
-SciMLLogging = "1.6.0"
+SciMLLogging = "1.7.1"
