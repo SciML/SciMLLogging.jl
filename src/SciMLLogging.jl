@@ -1,8 +1,9 @@
 module SciMLLogging
 
 import Logging
-using LoggingExtras
-using Preferences
+using Logging: NullLogger, current_logger
+using LoggingExtras: EarlyFilteredLogger, FileLogger, TeeLogger
+using Preferences: @load_preference, @set_preferences!
 
 include("verbosity.jl")
 include("utils.jl")
