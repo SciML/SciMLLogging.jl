@@ -168,3 +168,38 @@ end
     end
     @test !computation_ran_2arg  # Verify function was never called when verbose=false
 end
+
+@testset "Varargs support" begin
+    verbose = TestVerbosity()
+
+    x = 10
+    y = 20
+
+    # Test with bare symbols - message should be emitted with kwargs
+    @test_logs (:warn, r"With bare symbols") @SciMLMessage(
+        "With bare symbols", verbose, :test1, x, y)
+
+    # Test with keyword arguments
+    @test_logs (:warn, r"With kwargs") @SciMLMessage(
+        "With kwargs", verbose, :test1, a = 1, b = 2)
+
+    # Test with mixed bare symbols and kwargs
+    @test_logs (:warn, r"With mixed") @SciMLMessage(
+        "With mixed", verbose, :test1, x, extra = "info")
+
+    # Test with expression as value
+    @test_logs (:warn, r"With expression") @SciMLMessage(
+        "With expression", verbose, :test1, sum = x + y)
+
+    # Test that silent still skips emission even with varargs
+    verbose_silent = TestVerbosity(test1 = Silent())
+    @test_logs min_level = Logging.Debug @SciMLMessage(
+        "Should not appear", verbose_silent, :test1, x, y)
+
+    # Test varargs with boolean verbosity
+    @test_logs (:warn, r"Boolean with varargs") @SciMLMessage(
+        "Boolean with varargs", true, :_, x, y)
+
+    @test_logs min_level = Logging.Debug @SciMLMessage(
+        "Boolean false with varargs", false, :_, x, y)
+end
