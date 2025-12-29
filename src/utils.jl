@@ -34,7 +34,7 @@ end
 
 function emit_message(
         f::Function, verbose::V, option, group, file, line,
-        _module) where {V <: AbstractVerbositySpecifier{true}}
+        _module; kwargs...) where {V <: AbstractVerbositySpecifier{true}}
     level = message_level(
         verbose, option, group)
 
@@ -42,21 +42,38 @@ function emit_message(
         level
     elseif !isnothing(level)
         message = f()
-        Base.@logmsg level message _file=file _line=line _module=_module
+        _emit_log(level, message, _module, group, file, line; kwargs...)
     end
 end
 
 function emit_message(message::String, verbose::V,
-        option, group, file, line, _module) where {V <: AbstractVerbositySpecifier{true}}
+        option, group, file, line, _module; kwargs...) where {V <: AbstractVerbositySpecifier{true}}
     level = message_level(verbose, option, group)
 
     if !isnothing(level)
-        Base.@logmsg level message _file=file _line=line _module=_module _group=group
+        _emit_log(level, message, _module, group, file, line; kwargs...)
     end
 end
 
 function emit_message(
-        f, verbose::AbstractVerbositySpecifier{false}, option, group, file, line, _module)
+        f, verbose::AbstractVerbositySpecifier{false}, option, group, file, line, _module;
+        kwargs...)
+end
+
+# Helper function to emit log messages using the lower-level Logging API
+# This allows us to pass kwargs dynamically at runtime
+function _emit_log(level, message, _module, group, file, line; kwargs...)
+    # Generate a unique id based on file and line (similar to what @logmsg does)
+    id = Symbol(basename(file), "_", line)
+
+    # Get the appropriate logger
+    logger = Base.CoreLogging.current_logger_for_env(level, group, _module)
+
+    if logger !== nothing && Base.invokelatest(Base.CoreLogging.shouldlog, logger, level, _module, group, id)
+        Base.CoreLogging.handle_message_nothrow(
+            logger, level, message, _module, group, id, file, line; kwargs...)
+    end
+    nothing
 end
 
 """
@@ -81,13 +98,41 @@ y = 20
     "Message is: x + y = \$z"
 end
 ```
+
+Like the base logging macros, `@SciMLMessage` supports additional key-value arguments:
+
+```julia
+x = 10
+@SciMLMessage("Message", verbosity, :option, :group, x, extra_info="some info")
+```
 """
-macro SciMLMessage(f_or_message, verb, option, group)
+macro SciMLMessage(f_or_message, verb, option, group, exs...)
     line = __source__.line
     file = string(__source__.file)
     _module = __module__
+
+    # Process extra arguments similar to how base logging macros do it
+    # - Bare symbols like `x` become `x = x`
+    # - Keyword arguments like `a=1` stay as-is
+    # - Expressions become `Symbol(repr(expr)) = expr`
+    kwargs = []
+    for ex in exs
+        if ex isa Expr && ex.head === :(=) && ex.args[1] isa Symbol
+            # Already a key=value pair
+            push!(kwargs, Expr(:kw, ex.args[1], esc(ex.args[2])))
+        elseif ex isa Symbol
+            # Bare symbol - create key=symbol pair
+            push!(kwargs, Expr(:kw, ex, esc(ex)))
+        else
+            # Expression - use a generated key name
+            key = Symbol(string(ex))
+            push!(kwargs, Expr(:kw, key, esc(ex)))
+        end
+    end
+
     return :(emit_message(
-        $(esc(f_or_message)), $(esc(verb)), $option, $group, $file, $line, $_module))
+        $(esc(f_or_message)), $(esc(verb)), $option, $group, $file, $line, $_module;
+        $(kwargs...)))
 end
 
 """

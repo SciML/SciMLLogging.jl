@@ -63,3 +63,35 @@ end
         "Test1: $z"
     end
 end
+
+@testset "Varargs tests" begin
+    verbose = TestVerbosity{true}(TestOptionsVerbosity())
+
+    x = 10
+    y = 20
+
+    # Test with bare symbols - message should be emitted with kwargs
+    @test_logs (:warn, "Test with bare symbols") @SciMLMessage(
+        "Test with bare symbols", verbose, :test1, :options, x, y)
+
+    # Test with keyword arguments
+    @test_logs (:warn, "Test with kwargs") @SciMLMessage(
+        "Test with kwargs", verbose, :test1, :options, a = 1, b = 2)
+
+    # Test with mixed bare symbols and kwargs
+    @test_logs (:warn, "Test with mixed") @SciMLMessage(
+        "Test with mixed", verbose, :test1, :options, x, extra = "info")
+
+    # Test with expression as value
+    @test_logs (:warn, "Test with expression") @SciMLMessage(
+        "Test with expression", verbose, :test1, :options, sum = x + y)
+
+    # Test that verbose=false still skips emission
+    verbose_false = TestVerbosity{false}(TestOptionsVerbosity())
+    @test_logs min_level = Logging.Debug @SciMLMessage(
+        "Should not appear", verbose_false, :test1, :options, x, y)
+
+    # Test that Verbosity.None still skips emission
+    @test_logs min_level = Logging.Debug @SciMLMessage(
+        "Should not appear", verbose, :test4, :options, x, y)
+end
