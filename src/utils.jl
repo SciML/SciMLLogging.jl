@@ -32,41 +32,58 @@ end
 
 function emit_message(
         f::Function, level, option, file, line,
-        _module)
+        _module; kwargs...)
     message = f()
     msg = "Verbosity toggle: $option \n $message"
     @static if LOGGING_BACKEND == "core"
         Core.println(msg)
     else
-        Base.@logmsg level msg _file=file _line=line _module=_module
+        _emit_log(level, msg, _module, file, line; kwargs...)
     end
 
     if level == Logging.Error
         throw(ErrorException(msg))
-    end 
+    end
 end
 
 function emit_message(message::AbstractString,
-        level, option, file, line, _module)
+        level, option, file, line, _module; kwargs...)
 
     msg = "Verbosity toggle: $option \n $message"
     @static if LOGGING_BACKEND == "core"
         Core.println(msg)
     else
-        Base.@logmsg level msg _file=file _line=line _module=_module
+        _emit_log(level, msg, _module, file, line; kwargs...)
     end
 
     if level == Logging.Error
         throw(ErrorException(msg))
-    end 
+    end
 end
 
 function emit_message(message::AbstractString,
-    level::Nothing, option, file, line, _module)
-end 
+    level::Nothing, option, file, line, _module; kwargs...)
+end
 
 function emit_message(
-    f::Function, level::Nothing, option, file, line, _module)
+    f::Function, level::Nothing, option, file, line, _module; kwargs...)
+end
+
+# Helper function to emit log messages using the lower-level Logging API
+# This allows us to pass kwargs dynamically at runtime
+function _emit_log(level, message, _module, file, line; kwargs...)
+    # Generate a unique id based on file and line (similar to what @logmsg does)
+    id = Symbol(basename(file), "_", line)
+    group = Symbol(basename(file))
+
+    # Get the appropriate logger
+    logger = Base.CoreLogging.current_logger_for_env(level, group, _module)
+
+    if logger !== nothing && Base.invokelatest(Base.CoreLogging.shouldlog, logger, level, _module, group, id)
+        Base.CoreLogging.handle_message(
+            logger, level, message, _module, group, id, file, line; kwargs...)
+    end
+    nothing
 end
 
 function get_message_level(verb::AbstractVerbositySpecifier, option)
@@ -141,18 +158,49 @@ function solve_problem(problem; verbose::Bool = true)
     # ... solver logic ...
 end
 ```
+
+Like the base logging macros, `@SciMLMessage` supports additional key-value arguments:
+
+```julia
+x = 10
+@SciMLMessage("Message", verbosity, :option, x, extra_info="some info")
+# Output: ┌ Warning: Verbosity toggle: option
+#         │          Message
+#         │   x = 10
+#         └   extra_info = "some info"
+```
 """
-macro SciMLMessage(f_or_message, verb, option)
+macro SciMLMessage(f_or_message, verb, option, exs...)
     line = __source__.line
     file = string(__source__.file)
     _module = __module__
+
+    # Process extra arguments similar to how base logging macros do it
+    # - Bare symbols like `x` become `x = x`
+    # - Keyword arguments like `a=1` stay as-is
+    kwargs = []
+    for ex in exs
+        if ex isa Expr && ex.head === :(=) && ex.args[1] isa Symbol
+            # Already a key=value pair
+            push!(kwargs, Expr(:kw, ex.args[1], esc(ex.args[2])))
+        elseif ex isa Symbol
+            # Bare symbol - create key=symbol pair
+            push!(kwargs, Expr(:kw, ex, esc(ex)))
+        else
+            # Expression - use a generated key name
+            key = Symbol(string(ex))
+            push!(kwargs, Expr(:kw, key, esc(ex)))
+        end
+    end
+
     expr = quote
         emit_message($(esc(f_or_message)),
             get_message_level($(esc(verb)), $(esc(option))),
             $(esc(option)),
             $file,
             $line,
-            $_module)
+            $_module;
+            $(kwargs...))
     end
     return expr
 end
