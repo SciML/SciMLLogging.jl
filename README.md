@@ -160,3 +160,4 @@ silent = MyVerbosity{false}()
 # License
 
 SciMLVerbosity.jl is licensed under the MIT License.
+
