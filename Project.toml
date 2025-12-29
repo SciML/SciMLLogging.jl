@@ -10,6 +10,7 @@ Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 
 [compat]
 DocStringExtensions = "0.9.5"
+ExplicitImports = "1.10.3"
 Logging = "1.1.0"
 LoggingExtras = "1.1.0"
 Preferences = "1.5.0"
@@ -18,8 +19,9 @@ julia = "1.10"
 
 [extras]
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+ExplicitImports = "7d51a73a-1435-4ff3-83d9-f097790105c7"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "SafeTestsets", "DocStringExtensions"]
+test = ["Test", "SafeTestsets", "DocStringExtensions", "ExplicitImports"]
