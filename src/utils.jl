@@ -1,3 +1,19 @@
+"""
+    Verbosity
+
+An algebraic data type representing different verbosity levels for logging.
+
+# Variants
+- `None`: No output
+- `Info`: Informational messages
+- `Warn`: Warning messages
+- `Error`: Error messages
+- `Level(Int)`: Custom logging level using Julia's `LogLevel(n)`
+- `Edge`: Special case for edge behaviors
+- `All`: Maximum verbosity
+- `Default`: Default verbosity settings
+- `Code(Expr)`: Custom code expression for verbosity control
+"""
 @data Verbosity begin
     None
     Info
@@ -11,13 +27,35 @@
 end
 
 """
-AbstractVerbositySpecifier{T}
-Base for types which specify which log messages are emitted at what level.
+    AbstractVerbositySpecifier{T}
+
+Base type for types which specify which log messages are emitted at what level.
+
+The type parameter `T` is a boolean that controls whether verbosity is enabled:
+- `AbstractVerbositySpecifier{true}`: Verbosity is enabled
+- `AbstractVerbositySpecifier{false}`: Verbosity is disabled (all messages suppressed)
+
+# Usage
+Subtypes should contain fields that organize verbosity options by component and message type,
+with each option being a `Verbosity.Type` that specifies the logging level for that message category.
 """
 abstract type AbstractVerbositySpecifier{T} end
 
-# Utilities 
+# Utilities
 
+"""
+    message_level(verbose::AbstractVerbositySpecifier{true}, option, group)
+
+Get the Julia logging level for a specific verbosity option.
+
+# Arguments
+- `verbose`: The verbosity specifier
+- `option`: The specific option field (as a Symbol)
+- `group`: The group field containing the option (as a Symbol)
+
+# Returns
+- The corresponding Julia `LogLevel`, or `nothing` if output is suppressed, or an `Expr` for custom code
+"""
 function message_level(verbose::AbstractVerbositySpecifier{true}, option, group)
     group = getproperty(verbose, group)
     opt_level = getproperty(group, option)
@@ -127,6 +165,34 @@ function verbosity_to_bool(verb::Verbosity.Type)
     end
 end
 
+"""
+    SciMLLogger(; info_repl = true, warn_repl = true, error_repl = true,
+                  info_file = nothing, warn_file = nothing, error_file = nothing)
+
+Create a custom logger that directs different log levels to different outputs.
+
+# Arguments
+- `info_repl`: Whether to show Info messages in the REPL (default: true)
+- `warn_repl`: Whether to show Warn messages in the REPL (default: true)
+- `error_repl`: Whether to show Error messages in the REPL (default: true)
+- `info_file`: Optional file path to log Info messages (default: nothing)
+- `warn_file`: Optional file path to log Warn messages (default: nothing)
+- `error_file`: Optional file path to log Error messages (default: nothing)
+
+# Returns
+A `TeeLogger` that routes messages based on their log level.
+
+# Example
+```julia
+logger = SciMLLogger(
+    info_repl = true,
+    warn_file = "warnings.log"
+)
+with_logger(logger) do
+    # Your code with logging
+end
+```
+"""
 function SciMLLogger(; info_repl = true, warn_repl = true, error_repl = true,
         info_file = nothing, warn_file = nothing, error_file = nothing)
     info_sink = isnothing(info_file) ? NullLogger() : FileLogger(info_file)

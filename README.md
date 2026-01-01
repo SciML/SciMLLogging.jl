@@ -1,10 +1,10 @@
 # SciMLVerbosity
 
-[![Build Status](https://github.com/jClugstor/SciMLVerbosity.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/jClugstor/SciMLVerbosity.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Build Status](https://github.com/SciML/SciMLLogging.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/SciML/SciMLLogging.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
-A flexible verbosity control system for the SciML ecosystem that allows fine-grained control over logging, warnings.
+A flexible verbosity control system for the SciML ecosystem that allows fine-grained control over logging and warnings.
 
-Installation
+## Installation
 
 ```julia
 using Pkg
@@ -13,15 +13,14 @@ Pkg.add("SciMLVerbosity")
 
 SciMLVerbosity.jl provides a structured approach to controlling verbosity in scientific computing workflows. It enables:
 
-Fine-grained control over which messages are displayed and at what levels
-Hierarchical organization of verbosity settings by component and message type
+- Fine-grained control over which messages are displayed and at what levels
+- Hierarchical organization of verbosity settings by component and message type
+- Consistent logging patterns across the SciML ecosystem
 
-Consistent logging patterns across the SciML ecosystem
-
-# Basic Usage
+## Basic Usage
 
 ```julia
-using SciMLVerbosity
+using SciMLVerbosity: Verbosity, AbstractVerbositySpecifier, @SciMLMessage
 using Logging
 
 # Create a simple verbosity structure
@@ -63,7 +62,7 @@ verbose = MyVerbosity{true}()
 end
 ```
 
-# Verbosity Levels
+## Verbosity Levels
 
 SciMLVerbosity supports several verbosity levels:
 
@@ -76,14 +75,17 @@ SciMLVerbosity supports several verbosity levels:
   - `Verbosity.All()`: Maximum verbosity
   - `Verbosity.Default()`: Default verbosity settings
 
-# Creating Custom Verbosity Types
+## Creating Custom Verbosity Types
 
- 1. Define a structure for each group of verbosity options
- 2. Create a main verbosity struct that inherits from AbstractVerbositySpecifier{T}
- 3. Define constructors for easy creation and default values
-    Example:
+1. Define a structure for each group of verbosity options
+2. Create a main verbosity struct that inherits from `AbstractVerbositySpecifier{T}`
+3. Define constructors for easy creation and default values
+
+Example:
 
 ```julia
+using SciMLVerbosity: Verbosity, AbstractVerbositySpecifier
+
 # Define option groups
 mutable struct SolverOptions
     iterations::Verbosity.Type
@@ -126,11 +128,15 @@ end
 MyAppVerbosity(; enable = true, kwargs...) = MyAppVerbosity{enable}(; kwargs...)
 ```
 
-Integration with Julia's Logging System
-SciMLVerbosity integrates with Julia's built-in logging system. You can customize how logs are handled with the SciMLLogger,
-which allows you to direct logs to different outputs. Or you can use your own logger based on the Julia logging system or LoggingExtras.jl.
+## Integration with Julia's Logging System
+
+SciMLVerbosity integrates with Julia's built-in logging system. You can customize how logs are handled with the `SciMLLogger`,
+which allows you to direct logs to different outputs. Alternatively, you can use your own logger based on the Julia logging system or LoggingExtras.jl.
 
 ```julia
+using SciMLVerbosity: SciMLLogger
+using Logging
+
 # Create a logger that sends warnings to a file
 log_file = "warnings.log"
 logger = SciMLLogger(
@@ -146,7 +152,8 @@ with_logger(logger) do
 end
 ```
 
-Disabling Verbosity
+## Disabling Verbosity
+
 To completely disable verbosity without changing your code:
 
 ```julia
@@ -157,6 +164,6 @@ silent = MyVerbosity{false}()
 @SciMLMessage("This message won't be shown", silent, :algorithm_choice, :options)
 ```
 
-# License
+## License
 
 SciMLVerbosity.jl is licensed under the MIT License.
