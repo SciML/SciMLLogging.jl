@@ -1,4 +1,3 @@
-
 # Load preference for logging backend - defaults to "logging" for Julia Logging system
 const LOGGING_BACKEND = @load_preference("logging_backend", "logging")
 
@@ -10,7 +9,7 @@ Base for types which specify which log messages are emitted at what level.
 """
 abstract type AbstractVerbositySpecifier end
 
-# Utilities 
+# Utilities
 
 function logging_message_level(option)
     if option isa DebugLevel
@@ -27,46 +26,52 @@ function logging_message_level(option)
 end
 
 function logging_message_level(option::Silent)
-    nothing
-end 
+    return nothing
+end
 
 function emit_message(
         f::Function, level, option, file, line,
-        _module)
+        _module
+    )
     message = f()
     msg = "Verbosity toggle: $option \n $message"
     @static if LOGGING_BACKEND == "core"
         Core.println(msg)
     else
-        Base.@logmsg level msg _file=file _line=line _module=_module
+        Base.@logmsg level msg _file = file _line = line _module = _module
     end
 
-    if level == Logging.Error
+    return if level == Logging.Error
         throw(ErrorException(msg))
-    end 
+    end
 end
 
-function emit_message(message::AbstractString,
-        level, option, file, line, _module)
+function emit_message(
+        message::AbstractString,
+        level, option, file, line, _module
+    )
 
     msg = "Verbosity toggle: $option \n $message"
     @static if LOGGING_BACKEND == "core"
         Core.println(msg)
     else
-        Base.@logmsg level msg _file=file _line=line _module=_module
+        Base.@logmsg level msg _file = file _line = line _module = _module
     end
 
-    if level == Logging.Error
+    return if level == Logging.Error
         throw(ErrorException(msg))
-    end 
+    end
 end
 
-function emit_message(message::AbstractString,
-    level::Nothing, option, file, line, _module)
-end 
+function emit_message(
+        message::AbstractString,
+        level::Nothing, option, file, line, _module
+    )
+end
 
 function emit_message(
-    f::Function, level::Nothing, option, file, line, _module)
+        f::Function, level::Nothing, option, file, line, _module
+    )
 end
 
 function get_message_level(verb::AbstractVerbositySpecifier, option)
@@ -147,12 +152,14 @@ macro SciMLMessage(f_or_message, verb, option)
     file = string(__source__.file)
     _module = __module__
     expr = quote
-        emit_message($(esc(f_or_message)),
+        emit_message(
+            $(esc(f_or_message)),
             get_message_level($(esc(verb)), $(esc(option))),
             $(esc(option)),
             $file,
             $line,
-            $_module)
+            $_module
+        )
     end
     return expr
 end
@@ -245,7 +252,7 @@ Set the logging backend preference. Valid options are:
 Note: You must restart Julia for this preference change to take effect.
 """
 function set_logging_backend(backend::String)
-    if backend in ["logging", "core"]
+    return if backend in ["logging", "core"]
         @set_preferences!("logging_backend" => backend)
         @info("Logging backend set to '$backend'. Restart Julia for changes to take effect!")
     else
@@ -277,8 +284,10 @@ Create a logger that routes messages to REPL and/or files based on log level.
 - `warn_file = nothing`: File path for warnings
 - `error_file = nothing`: File path for errors
 """
-function SciMLLogger(; debug_repl = false, info_repl = true, warn_repl = true, error_repl = true,
-        debug_file = nothing, info_file = nothing, warn_file = nothing, error_file = nothing)
+function SciMLLogger(;
+        debug_repl = false, info_repl = true, warn_repl = true, error_repl = true,
+        debug_file = nothing, info_file = nothing, warn_file = nothing, error_file = nothing
+    )
     debug_sink = isnothing(debug_file) ? NullLogger() : FileLogger(debug_file)
     info_sink = isnothing(info_file) ? NullLogger() : FileLogger(info_file)
     warn_sink = isnothing(warn_file) ? NullLogger() : FileLogger(warn_file)
@@ -286,10 +295,10 @@ function SciMLLogger(; debug_repl = false, info_repl = true, warn_repl = true, e
 
     repl_filter = EarlyFilteredLogger(current_logger()) do log
         return (
-        	(log.level == Logging.Debug && debug_repl) ||
-        	(log.level == Logging.Info && info_repl) ||
-        	(log.level == Logging.Warn && warn_repl) ||
-        	(log.level == Logging.Error && error_repl)
+            (log.level == Logging.Debug && debug_repl) ||
+                (log.level == Logging.Info && info_repl) ||
+                (log.level == Logging.Warn && warn_repl) ||
+                (log.level == Logging.Error && error_repl)
         )
     end
 
@@ -309,5 +318,5 @@ function SciMLLogger(; debug_repl = false, info_repl = true, warn_repl = true, e
         log.level == Logging.Error
     end
 
-    TeeLogger(repl_filter, debug_filter, info_filter, warn_filter, error_filter)
+    return TeeLogger(repl_filter, debug_filter, info_filter, warn_filter, error_filter)
 end
