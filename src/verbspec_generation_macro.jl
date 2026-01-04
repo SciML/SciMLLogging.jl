@@ -136,11 +136,13 @@ macro verbosity_specifier(name, block)
         preset_config = presets_dict[preset_name]
         field_values = [preset_config[t] for t in toggles]
 
-        push!(preset_constructors, :(
-            function $name(::$preset_name)
-                return $name($(field_values...))
-            end
-        ))
+        push!(
+            preset_constructors, :(
+                function $name(::$preset_name)
+                    return $name($(field_values...))
+                end
+            )
+        )
     end
 
     # Build toggle to group mapping
@@ -162,13 +164,17 @@ macro verbosity_specifier(name, block)
     # Build validation for groups
     group_validations = []
     for group_name in group_names
-        lazy_str = Expr(:macrocall, Symbol("@lazy_str"), LineNumberNode(@__LINE__, @__FILE__),
-                       "\$($(QuoteNode(group_name))) must be a SciMLLogging.AbstractMessageLevel, got \$(typeof($(group_name)))")
-        push!(group_validations, quote
-            if $(group_name) !== nothing && !($(group_name) isa AbstractMessageLevel)
-                throw(ArgumentError($lazy_str))
+        lazy_str = Expr(
+            :macrocall, Symbol("@lazy_str"), LineNumberNode(@__LINE__, @__FILE__),
+            "\$($(QuoteNode(group_name))) must be a SciMLLogging.AbstractMessageLevel, got \$(typeof($(group_name)))"
+        )
+        push!(
+            group_validations, quote
+                if $(group_name) !== nothing && !($(group_name) isa AbstractMessageLevel)
+                    throw(ArgumentError($lazy_str))
+                end
             end
-        end)
+        )
     end
 
     # Build precedence logic for each toggle
@@ -204,12 +210,18 @@ macro verbosity_specifier(name, block)
     runtime_condition = foldr((a, b) -> :($a && $b), [:($(g) === nothing) for g in group_names]; init = :(preset === nothing && isempty(kwargs)))
 
     # Build lazy string expressions
-    preset_error_str = Expr(:macrocall, Symbol("@lazy_str"), LineNumberNode(@__LINE__, @__FILE__),
-                           "preset must be a SciMLLogging.AbstractVerbosityPreset, got \$(typeof(preset))")
-    unknown_option_str = Expr(:macrocall, Symbol("@lazy_str"), LineNumberNode(@__LINE__, @__FILE__),
-                             "Unknown verbosity option: \$key. Valid options are: $(Tuple(toggles))")
-    invalid_type_str = Expr(:macrocall, Symbol("@lazy_str"), LineNumberNode(@__LINE__, @__FILE__),
-                           "\$key must be a SciMLLogging.AbstractMessageLevel, AbstractVerbosityPreset, or AbstractVerbositySpecifier, got \$(typeof(value))")
+    preset_error_str = Expr(
+        :macrocall, Symbol("@lazy_str"), LineNumberNode(@__LINE__, @__FILE__),
+        "preset must be a SciMLLogging.AbstractVerbosityPreset, got \$(typeof(preset))"
+    )
+    unknown_option_str = Expr(
+        :macrocall, Symbol("@lazy_str"), LineNumberNode(@__LINE__, @__FILE__),
+        "Unknown verbosity option: \$key. Valid options are: $(Tuple(toggles))"
+    )
+    invalid_type_str = Expr(
+        :macrocall, Symbol("@lazy_str"), LineNumberNode(@__LINE__, @__FILE__),
+        "\$key must be a SciMLLogging.AbstractMessageLevel, AbstractVerbosityPreset, or AbstractVerbositySpecifier, got \$(typeof(value))"
+    )
 
     main_constructor = quote
         function $name(; $(kwarg_params...), kwargs...)

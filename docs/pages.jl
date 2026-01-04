@@ -11,6 +11,6 @@ pages = [
         "Verbosity Presets" => "manual/presets.md",
         "@SciMLMessage Macro" => "manual/macro.md",
         "Conversion Utilities" => "manual/conversion_utilities.md",
-        "Logging Backends" => "manual/backends.md"
-    ]
+        "Logging Backends" => "manual/backends.md",
+    ],
 ]

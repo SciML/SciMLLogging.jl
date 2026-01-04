@@ -14,13 +14,14 @@ struct TestVerbosity <: AbstractVerbositySpecifier
             test1 = WarnLevel(),
             test2 = InfoLevel(),
             test3 = ErrorLevel(),
-            test4 = Silent())
-        new(test1, test2, test3, test4)
+            test4 = Silent()
+        )
+        return new(test1, test2, test3, test4)
     end
 end
 
 function TestVerbosity(preset::AbstractVerbosityPreset)
-    if preset isa SciMLLogging.None
+    return if preset isa SciMLLogging.None
         TestVerbosity(
             test1 = Silent(),
             test2 = Silent(),
@@ -46,7 +47,7 @@ function TestVerbosity(preset::AbstractVerbosityPreset)
     end
 end
 
-# Tests 
+# Tests
 
 @testset "Basic tests" begin
     verbose = TestVerbosity()
@@ -54,7 +55,7 @@ end
     @test_logs (:warn, r"Test1") @SciMLMessage("Test1", verbose, :test1)
     @test_logs (:info, r"Test2") @SciMLMessage("Test2", verbose, :test2)
     @test_logs (:error, r"Test3") @test_throws "Test3" begin
-         @SciMLMessage("Test3", verbose, :test3)
+        @SciMLMessage("Test3", verbose, :test3)
     end
     @test_logs min_level = Logging.Debug @SciMLMessage("Test4", verbose, :test4)
 
@@ -78,7 +79,7 @@ end
 
     # Minimal preset should only log errors and throw for error messages
     @test_logs (:error, r"Minimal preset test") @test_throws ErrorException("Verbosity toggle: test1 \n Minimal preset test") begin
-       @SciMLMessage("Minimal preset test", verbose_minimal, :test1)
+        @SciMLMessage("Minimal preset test", verbose_minimal, :test1)
     end
 
     # Test that minimal preset throws for test3 (which is ErrorLevel)
