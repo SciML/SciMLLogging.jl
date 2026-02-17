@@ -272,7 +272,7 @@ version = "1.9.0"
     SciMLLoggingTracyExt = "Tracy"
 
     [deps.SciMLLogging.weakdeps]
-    Tracy = "e689d1e8-eaf7-477a-ba6d-2dc50cd4e5ad"
+    Tracy = "e689c965-62c8-4b79-b2c5-8359227902fd"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
