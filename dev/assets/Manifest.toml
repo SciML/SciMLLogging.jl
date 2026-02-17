@@ -266,7 +266,7 @@ version = "0.7.0"
 deps = ["Logging", "LoggingExtras", "Preferences"]
 path = "/home/runner/work/SciMLLogging.jl/SciMLLogging.jl"
 uuid = "a6db7da4-7206-11f0-1eab-35f2a5dbe1d1"
-version = "1.8.0"
+version = "1.9.0"
 
     [deps.SciMLLogging.extensions]
     SciMLLoggingTracyExt = "Tracy"
