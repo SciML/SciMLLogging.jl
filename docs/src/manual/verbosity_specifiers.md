@@ -22,31 +22,30 @@ The `@verbosity_specifier` macro automatically generates a parametric struct wit
 
 ### Manual Implementation
 
-Alternatively, you can manually define verbosity specifier types by subtyping `AbstractVerbositySpecifier`:
+Alternatively, you can manually define verbosity specifier types by subtyping
+`AbstractVerbositySpecifier{Enabled}`. The `Enabled` type parameter lets the compiler
+eliminate logging branches entirely when the specifier is disabled:
 
 ```julia
 using SciMLLogging
-using ConcreteStructs: @concrete
 
-@concrete struct MyPackageVerbosity <: AbstractVerbositySpecifier
-    initialization   # Controls startup and setup messages
-    progress         # Controls progress and iteration updates
-    convergence      # Controls convergence-related messages
-    diagnostics      # Controls diagnostic messages
-    performance      # Controls performance-related messages
+struct MyPackageVerbosity{Enabled} <: AbstractVerbositySpecifier{Enabled}
+    initialization::MessageLevel   # Controls startup and setup messages
+    progress::MessageLevel         # Controls progress and iteration updates
+    convergence::MessageLevel      # Controls convergence-related messages
+    diagnostics::MessageLevel      # Controls diagnostic messages
+    performance::MessageLevel      # Controls performance-related messages
 end
 ```
 
-**Note:** It is recommended that the verbosity specifier is concretely typed for several performance reasons:
+**Note:** Concretely typing the fields as `MessageLevel` is recommended for performance:
 
 - **Type stability**: Eliminates type instabilities that can hurt performance
-- **Compile-time optimization**: Allows the compiler to generate more efficient code
-
-The `@concrete` macro from ConcreteStructs.jl is a convenient way to automate that. 
+- **Compile-time optimization**: Allows the compiler to constant-fold logging branches when the specifier is a constant
 
 ## Configuring Message Categories
 
-Each field in a verbosity specifier can be set to any `AbstractMessageLevel`:
+Each field in a verbosity specifier can be set to any `MessageLevel`:
 
 ```julia
 # Create a custom configuration

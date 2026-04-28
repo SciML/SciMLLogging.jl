@@ -1,7 +1,7 @@
 using SciMLLogging
 using SciMLLogging: SciMLLogging, AbstractVerbositySpecifier, @SciMLMessage,
-    AbstractVerbosityPreset, AbstractMessageLevel, WarnLevel, InfoLevel,
-    ErrorLevel, Silent, None, All, Minimal, @verbosity_specifier
+    AbstractVerbosityPreset, MessageLevel, AbstractMessageLevel, WarnLevel, InfoLevel,
+    ErrorLevel, Silent, None, All, Minimal, Standard, Detailed, @verbosity_specifier
 using Logging
 using Test
 
@@ -535,4 +535,168 @@ end
         @test v.preconditioner == Silent()  # From preset
         @test v.convergence == ErrorLevel()  # From preset
     end
+end
+
+# Inner spec used as a sub-specifier below
+@verbosity_specifier InnerVerb begin
+    toggles = (:inner_a, :inner_b)
+
+    presets = (
+        None = (inner_a = Silent(), inner_b = Silent()),
+        Minimal = (inner_a = WarnLevel(), inner_b = Silent()),
+        Standard = (inner_a = InfoLevel(), inner_b = WarnLevel()),
+        Detailed = (inner_a = DebugLevel(), inner_b = InfoLevel()),
+        All = (inner_a = DebugLevel(), inner_b = DebugLevel()),
+    )
+
+    groups = ()
+end
+
+# Outer spec exercising the `specifiers` block: holds toggles AND a sub-specifier field
+@verbosity_specifier OuterVerb begin
+    toggles = (:outer_a, :outer_b)
+
+    specifiers = (:inner,)
+
+    presets = (
+        None = (
+            outer_a = Silent(),
+            outer_b = Silent(),
+            inner = InnerVerb(None()),
+        ),
+        Minimal = (
+            outer_a = WarnLevel(),
+            outer_b = Silent(),
+            inner = InnerVerb(Minimal()),
+        ),
+        Standard = (
+            outer_a = InfoLevel(),
+            outer_b = WarnLevel(),
+            inner = InnerVerb(Standard()),
+        ),
+        Detailed = (
+            outer_a = DebugLevel(),
+            outer_b = InfoLevel(),
+            inner = InnerVerb(Detailed()),
+        ),
+        All = (
+            outer_a = DebugLevel(),
+            outer_b = DebugLevel(),
+            inner = InnerVerb(All()),
+        ),
+    )
+
+    groups = (
+        outer_group = (:outer_a, :outer_b),
+    )
+end
+
+@testset "OuterVerb with specifiers block" begin
+    @testset "Field typing" begin
+        v = OuterVerb()
+        T = typeof(v)
+        # Toggle fields must be concretely typed as MessageLevel when specifiers block is present
+        @test fieldtype(T, :outer_a) === MessageLevel
+        @test fieldtype(T, :outer_b) === MessageLevel
+        # Specifier fields are parametric and resolve to the concrete instance type —
+        # this is what lets `outer.inner.toggle` flow through inference without
+        # collapsing into an abstract Union.
+        @test fieldtype(T, :inner) === InnerVerb{true}
+        @test isconcretetype(fieldtype(T, :inner))
+        # The outer struct has an extra type parameter for the specifier slot
+        @test T <: OuterVerb{true}
+        @test T !== OuterVerb{true}
+    end
+
+    @testset "Default constructor" begin
+        v = OuterVerb()
+        @test v.outer_a == InfoLevel()
+        @test v.outer_b == WarnLevel()
+        @test v.inner isa InnerVerb
+        @test v.inner.inner_a == InfoLevel()
+        @test v.inner.inner_b == WarnLevel()
+    end
+
+    @testset "Preset constructors set both toggles and specifiers" begin
+        v_none = OuterVerb(None())
+        @test v_none.outer_a == Silent()
+        @test v_none.outer_b == Silent()
+        @test v_none.inner isa InnerVerb
+        @test v_none.inner.inner_a == Silent()
+        # None preset should produce a {false} instance — disabled at the type level
+        @test typeof(v_none) <: AbstractVerbositySpecifier{false}
+
+        v_min = OuterVerb(Minimal())
+        @test v_min.outer_a == WarnLevel()
+        @test v_min.inner.inner_a == WarnLevel()
+        @test typeof(v_min) <: AbstractVerbositySpecifier{true}
+
+        v_all = OuterVerb(All())
+        @test v_all.outer_a == DebugLevel()
+        @test v_all.inner.inner_b == DebugLevel()
+    end
+
+    @testset "Override specifier field via kwarg with another verbosity instance" begin
+        custom_inner = InnerVerb(All())
+        v = OuterVerb(inner = custom_inner)
+        @test v.inner === custom_inner
+        @test v.outer_a == InfoLevel()  # default from Standard preset
+    end
+
+    @testset "Override specifier field via kwarg with a preset value" begin
+        v = OuterVerb(inner = None())
+        @test v.inner isa None
+        @test v.outer_a == InfoLevel()  # from Standard preset
+    end
+
+    @testset "Override toggle field via kwarg" begin
+        v = OuterVerb(outer_a = ErrorLevel())
+        @test v.outer_a == ErrorLevel()
+        @test v.outer_b == WarnLevel()  # from Standard preset
+        @test v.inner isa InnerVerb     # from Standard preset
+    end
+
+    @testset "Group still applies to toggle fields" begin
+        v = OuterVerb(outer_group = ErrorLevel())
+        @test v.outer_a == ErrorLevel()
+        @test v.outer_b == ErrorLevel()
+        @test v.inner isa InnerVerb     # specifier untouched
+    end
+
+    @testset "Combined preset + specifier override + group + individual" begin
+        v = OuterVerb(
+            preset = Detailed(),
+            inner = InnerVerb(None()),
+            outer_group = WarnLevel(),
+            outer_a = ErrorLevel()
+        )
+        @test v.outer_a == ErrorLevel()                # individual wins
+        @test v.outer_b == WarnLevel()                 # from group
+        @test v.inner.inner_a == Silent()              # from explicit InnerVerb(None())
+    end
+
+    @testset "Validation: toggle field requires MessageLevel when specifiers block is declared" begin
+        # When specifiers block is present, toggles must be a MessageLevel — passing a preset
+        # or another verbosity specifier as a toggle is rejected.
+        @test_throws ArgumentError OuterVerb(outer_a = None())
+        @test_throws ArgumentError OuterVerb(outer_a = InnerVerb())
+        @test_throws ArgumentError OuterVerb(outer_a = "not a level")
+    end
+
+    @testset "Validation: specifier field rejects non-spec/non-preset values" begin
+        @test_throws ArgumentError OuterVerb(inner = InfoLevel())
+        @test_throws ArgumentError OuterVerb(inner = "not a spec")
+        @test_throws ArgumentError OuterVerb(inner = 42)
+    end
+
+    @testset "Unknown field still raises" begin
+        @test_throws ArgumentError OuterVerb(not_a_real_field = InfoLevel())
+    end
+end
+
+# Sanity check: a spec without a specifiers block keeps the wider toggle Union typing.
+# This guards against accidentally regressing the backward-compatible code path.
+@testset "Toggle-only spec retains Union field typing" begin
+    @test fieldtype(VerbSpec{true}, :toggle1) ===
+        Union{MessageLevel, AbstractVerbosityPreset, AbstractVerbositySpecifier}
 end

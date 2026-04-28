@@ -27,7 +27,7 @@ end
 function emit_all(verbose)
     @SciMLMessage("msg a", verbose, :a)
     @SciMLMessage("msg b", verbose, :b)
-    @SciMLMessage("msg c", verbose, :c)
+    @SciMLMessage(lazy"msg c", verbose, :c)
     return nothing
 end
 

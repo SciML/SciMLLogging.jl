@@ -67,40 +67,41 @@ Here's a full example showing how SciMLLogging works in practice, using a simula
 
 ```@example
 using SciMLLogging
-using SciMLLogging: None, Standard, All
-using ConcreteStructs: @concrete
+using SciMLLogging: None, Standard, All, AbstractVerbositySpecifier, MessageLevel
 
-# 1. Define a verbosity specifier (this would typically be done by a package)
-@concrete struct SolverVerbosity <: AbstractVerbositySpecifier
-    initialization
-    iterations
-    convergence
-    linear_solve
-    warnings
+# 1. Define a verbosity specifier (this would typically be done by a package).
+#    The {Enabled} type parameter lets the compiler eliminate logging branches
+#    entirely when the specifier is disabled.
+struct SolverVerbosity{Enabled} <: AbstractVerbositySpecifier{Enabled}
+    initialization::MessageLevel
+    iterations::MessageLevel
+    convergence::MessageLevel
+    linear_solve::MessageLevel
+    warnings::MessageLevel
 end
 
 # Likewise the constructors would typically be implemented by a package
 function SolverVerbosity(;
-    initialization = Info(),
+    initialization = InfoLevel(),
     iterations = Silent(),
     convergence = InfoLevel(),
     linear_solve = Silent(),
     warnings = WarnLevel()
     )
-    SolverVerbosity(initialization, iterations, convergence, linear_solve, warnings)
+    SolverVerbosity{true}(initialization, iterations, convergence, linear_solve, warnings)
 end
 
-# 2. Implement preset support
-function SolverVerbosity(preset::None)
-    SolverVerbosity(Silent(), Silent(), Silent(), Silent(), Silent())
+# 2. Implement preset support. None() returns a {false} instance — disabled at the type level.
+function SolverVerbosity(::None)
+    SolverVerbosity{false}(Silent(), Silent(), Silent(), Silent(), Silent())
 end
 
-function SolverVerbosity(preset::Standard)
-    SolverVerbosity(InfoLevel(), Silent(), InfoLevel(), Silent(), WarnLevel())
+function SolverVerbosity(::Standard)
+    SolverVerbosity{true}(InfoLevel(), Silent(), InfoLevel(), Silent(), WarnLevel())
 end
 
-function SolverVerbosity(preset::All)
-    SolverVerbosity(InfoLevel(), InfoLevel(), InfoLevel(), InfoLevel(), WarnLevel())
+function SolverVerbosity(::All)
+    SolverVerbosity{true}(InfoLevel(), InfoLevel(), InfoLevel(), InfoLevel(), WarnLevel())
 end
 
 # 3. Example solver function using SciMLLogging, the specific messages and where the messages are emitted

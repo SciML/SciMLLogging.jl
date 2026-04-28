@@ -28,30 +28,32 @@ First, decide what aspects of your package should be controllable by users. For 
 
 ## Step 2: Create Your Verbosity Type
 
-Define a struct that subtypes `AbstractVerbositySpecifier`:
+Define a parametric struct that subtypes `AbstractVerbositySpecifier{Enabled}`. The
+`Enabled` parameter lets the compiler eliminate logging branches entirely when the
+verbosity instance is disabled (`Enabled === false`):
 
 ```julia
 using SciMLLogging
-using ConcreteStructs: @concrete
 
-@concrete struct MySolverVerbosity <: AbstractVerbositySpecifier
-    initialization
-    iterations
-    convergence
-    warnings
+struct MySolverVerbosity{Enabled} <: AbstractVerbositySpecifier{Enabled}
+    initialization::MessageLevel
+    iterations::MessageLevel
+    convergence::MessageLevel
+    warnings::MessageLevel
 end
 
-# Constructor with defaults
+# Constructor with defaults — produces an enabled instance
 function MySolverVerbosity(;
         initialization = InfoLevel(),
         iterations = Silent(),
         convergence = InfoLevel(),
         warnings = WarnLevel()
 )
-    MySolverVerbosity(initialization, iterations, convergence, warnings)
+    MySolverVerbosity{true}(initialization, iterations, convergence, warnings)
 end
 ```
-- Use `@concrete` from ConcreteStructs.jl for better performance
+- Concretely typing fields as `MessageLevel` lets the compiler constant-fold logging branches
+- The `{Enabled}` type parameter selects between two `get_message_level` methods at compile time
 - Each field represents a category of messages your package can emit
 
 ## Step 3: Add Convenience Constructors
@@ -59,29 +61,15 @@ end
 Make it easy for users to create verbosity instances. Perhaps include a constructor that can take a AbstractVerbosityPreset, and use it to set the rest of the fields, and a constructor that takes all keyword arguments:
 
 ```julia
-# Preset-based constructor (optional)
+# Preset-based constructor (optional). Note that `None()` returns a {false}
+# instance — the type parameter signals "disabled" so logging calls compile away.
 function MySolverVerbosity(preset::AbstractVerbosityPreset)
     if preset isa None
-        MySolverVerbosity(
-            initialization = Silent(),
-            iterations = Silent(),
-            convergence = Silent(),
-            warnings = Silent()
-        )
+        MySolverVerbosity{false}(Silent(), Silent(), Silent(), Silent())
     elseif preset isa All
-        MySolverVerbosity(
-            initialization = InfoLevel(),
-            iterations = InfoLevel(),
-            convergence = InfoLevel(),
-            error_control = WarnLevel()
-        )
+        MySolverVerbosity{true}(InfoLevel(), InfoLevel(), InfoLevel(), WarnLevel())
     elseif preset isa Minimal
-        MySolverVerbosity(
-            initialization = Silent(),
-            iterations = Silent(),
-            convergence = ErrorLevel(),
-            error_control = ErrorLevel()
-        )
+        MySolverVerbosity{true}(Silent(), Silent(), ErrorLevel(), ErrorLevel())
     else
         MySolverVerbosity()  # Default
     end
@@ -164,17 +152,16 @@ verbose = MySolverVerbosity(
 
 Here's a complete minimal example:
 
-```@example 
+```@example
 using SciMLLogging
-using ConcreteStructs: @concrete
-import SciMLLogging: AbstractVerbositySpecifier
+import SciMLLogging: AbstractVerbositySpecifier, MessageLevel
 
-@concrete struct ExampleVerbosity <: AbstractVerbositySpecifier
-    progress
+struct ExampleVerbosity{Enabled} <: AbstractVerbositySpecifier{Enabled}
+    progress::MessageLevel
 end
 
-# Constructor with default
-ExampleVerbosity(; progress = InfoLevel()) = ExampleVerbosity(progress)
+# Constructor with default — produces an enabled instance
+ExampleVerbosity(; progress = InfoLevel()) = ExampleVerbosity{true}(progress)
 
 function solve_example(n::Int, verbose::ExampleVerbosity)
     result = 0

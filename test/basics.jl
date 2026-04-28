@@ -1,47 +1,32 @@
 using SciMLLogging
-using SciMLLogging: SciMLLogging, AbstractVerbositySpecifier, @SciMLMessage, AbstractVerbosityPreset, AbstractMessageLevel, WarnLevel, InfoLevel, ErrorLevel, Silent, None, All, Minimal
+using SciMLLogging: SciMLLogging, AbstractVerbositySpecifier, @SciMLMessage, AbstractVerbosityPreset, MessageLevel, AbstractMessageLevel, WarnLevel, InfoLevel, ErrorLevel, Silent, None, All, Minimal
 using Logging
 using Test
 
 # Structs for testing package - simplified structure
-struct TestVerbosity <: AbstractVerbositySpecifier
-    test1
-    test2
-    test3
-    test4
+struct TestVerbosity{Enabled} <: AbstractVerbositySpecifier{Enabled}
+    test1::MessageLevel
+    test2::MessageLevel
+    test3::MessageLevel
+    test4::MessageLevel
+end
 
-    function TestVerbosity(;
-            test1 = WarnLevel(),
-            test2 = InfoLevel(),
-            test3 = ErrorLevel(),
-            test4 = Silent()
-        )
-        return new(test1, test2, test3, test4)
-    end
+function TestVerbosity(;
+        test1 = WarnLevel(),
+        test2 = InfoLevel(),
+        test3 = ErrorLevel(),
+        test4 = Silent()
+    )
+    return TestVerbosity{true}(test1, test2, test3, test4)
 end
 
 function TestVerbosity(preset::AbstractVerbosityPreset)
     return if preset isa SciMLLogging.None
-        TestVerbosity(
-            test1 = Silent(),
-            test2 = Silent(),
-            test3 = Silent(),
-            test4 = Silent()
-        )
+        TestVerbosity{false}(Silent(), Silent(), Silent(), Silent())
     elseif preset isa SciMLLogging.All
-        TestVerbosity(
-            test1 = InfoLevel(),
-            test2 = InfoLevel(),
-            test3 = InfoLevel(),
-            test4 = InfoLevel()
-        )
+        TestVerbosity{true}(InfoLevel(), InfoLevel(), InfoLevel(), InfoLevel())
     elseif preset isa Minimal
-        TestVerbosity(
-            test1 = ErrorLevel(),
-            test2 = Silent(),
-            test3 = ErrorLevel(),
-            test4 = Silent()
-        )
+        TestVerbosity{true}(ErrorLevel(), Silent(), ErrorLevel(), Silent())
     else
         TestVerbosity()
     end

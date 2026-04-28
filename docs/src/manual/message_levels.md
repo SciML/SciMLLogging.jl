@@ -7,10 +7,10 @@ Message levels in SciMLLogging determine the severity and importance of log mess
 SciMLLogging provides a hierarchy of message levels that correspond to different types of information:
 
 ```@docs
-AbstractMessageLevel
+MessageLevel
 ```
 
-Each of the `AbstractMessageLevel`s correspond to a Julia Logging `LogLevel` type with an associated integer, besides `Silent`. 
+`AbstractMessageLevel` is a backward-compatible alias for `MessageLevel`. Each level (apart from `Silent`) corresponds to a Julia Logging `LogLevel` type with an associated integer.
 See the [Julia Logging documentation](https://docs.julialang.org/en/v1/stdlib/Logging/#Log-event-structure) for more details. 
 
 ## Standard Message Levels

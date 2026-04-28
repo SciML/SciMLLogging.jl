@@ -7,27 +7,21 @@ const LOGGING_BACKEND = @load_preference("logging_backend", "logging")
 Base for types which specify which log messages are emitted at what level.
     
 """
-abstract type AbstractVerbositySpecifier end
+abstract type AbstractVerbositySpecifier{Enabled} end
 
 # Utilities
 
-function logging_message_level(option)
-    if option isa DebugLevel
-        return Logging.Debug
-    elseif option isa InfoLevel
-        return Logging.Info
-    elseif option isa WarnLevel
-        return Logging.Warn
-    elseif option isa ErrorLevel
-        return Logging.Error
-    elseif option isa CustomLevel
-        return Logging.LogLevel(option.level)
-    end
+@inline function logging_message_level(m::MessageLevel)
+    m == Silent     && return nothing
+    m == DebugLevel && return Logging.Debug
+    m == InfoLevel  && return Logging.Info
+    m == WarnLevel  && return Logging.Warn
+    m == ErrorLevel && return Logging.Error
+    return Logging.LogLevel(m.level)
 end
 
-function logging_message_level(option::Silent)
-    return nothing
-end
+logging_message_level(::AbstractVerbosityPreset) = nothing
+logging_message_level(::AbstractVerbositySpecifier) = nothing
 
 function emit_message(
         f::Function, level, option, file, line,
@@ -100,12 +94,16 @@ function _emit_log(level, message, _module, file, line; kwargs...)
     return nothing
 end
 
-function get_message_level(verb::AbstractVerbositySpecifier, option)
+@inline function get_message_level(::AbstractVerbositySpecifier{false}, ::Any)
+    return nothing
+end
+
+@inline function get_message_level(verb::AbstractVerbositySpecifier{true}, option)
     return logging_message_level(getproperty(verb, option))
 end
 
-function get_message_level(verb::Bool, _)
-    return verb ? logging_message_level(WarnLevel()) : logging_message_level(Silent())
+@inline function get_message_level(verb::Bool, _)
+    return verb ? logging_message_level(WarnLevel) : nothing
 end
 
 
@@ -129,12 +127,12 @@ The macro works with any `AbstractVerbositySpecifier` implementation:
 
 ```julia
 # Package defines verbosity specifier
-@concrete struct SolverVerbosity <: AbstractVerbositySpecifier
-    initialization
-    progress
-    convergence
-    diagnostics
-    performance
+struct SolverVerbosity{Enabled} <: AbstractVerbositySpecifier{Enabled}
+    initialization::MessageLevel
+    progress::MessageLevel
+    convergence::MessageLevel
+    diagnostics::MessageLevel
+    performance::MessageLevel
 end
 
 # Usage in package code
@@ -208,15 +206,17 @@ macro SciMLMessage(f_or_message, verb, option, exs...)
     end
 
     expr = quote
-        emit_message(
-            $(esc(f_or_message)),
-            get_message_level($(esc(verb)), $(esc(option))),
-            $(esc(option)),
-            $file,
-            $line,
-            $_module;
-            $(kwargs...)
-        )
+        let _sciml_level = get_message_level($(esc(verb)), $(esc(option)))
+            _sciml_level !== nothing && emit_message(
+                $(esc(f_or_message)),
+                _sciml_level,
+                $(esc(option)),
+                $file,
+                $line,
+                $_module;
+                $(kwargs...)
+            )
+        end
     end
     return expr
 end
@@ -226,9 +226,9 @@ macro SciMLMessage(f_or_message, verb)
 end
 
 """
-        `verbosity_to_int(verb::AbstractMessageLevel)`
+        `verbosity_to_int(verb::MessageLevel)`
 
-    Takes a `AbstractMessageLevel` and gives a corresponding integer value.
+    Takes a `MessageLevel` and gives a corresponding integer value.
     Verbosity settings that use integers or enums that hold integers are relatively common.
     This provides an interface so that these packages can be used with SciMLVerbosity. Each of the basic verbosity levels
     are mapped to an integer.
@@ -251,28 +251,19 @@ end
     verbosity_to_int(CustomLevel(-5)) # Returns -5
     ```
 """
-function verbosity_to_int(verb::AbstractMessageLevel)
-    if verb isa Silent
-        return 0
-    elseif verb isa DebugLevel
-        return 1
-    elseif verb isa InfoLevel
-        return 2
-    elseif verb isa WarnLevel
-        return 3
-    elseif verb isa ErrorLevel
-        return 4
-    elseif verb isa CustomLevel
-        return verb.level
-    else
-        return 0
-    end
+function verbosity_to_int(verb::MessageLevel)
+    verb == Silent     && return 0
+    verb == DebugLevel && return 1
+    verb == InfoLevel  && return 2
+    verb == WarnLevel  && return 3
+    verb == ErrorLevel && return 4
+    return verb.level
 end
 
 """
-        `verbosity_to_bool(verb::AbstractMessageLevel)`
-        
-    Takes a `AbstractMessageLevel` and gives a corresponding boolean value.
+        `verbosity_to_bool(verb::MessageLevel)`
+
+    Takes a `MessageLevel` and gives a corresponding boolean value.
     Verbosity settings that use booleans are relatively common.
     This provides an interface so that these packages can be used with SciMLVerbosity.
     If the verbosity is `Silent`, then `false` is returned. Otherwise, `true` is returned.
@@ -291,12 +282,8 @@ end
     ```
 
 """
-function verbosity_to_bool(verb::AbstractMessageLevel)
-    if verb isa Silent
-        return false
-    else
-        return true
-    end
+function verbosity_to_bool(verb::MessageLevel)
+    return verb != Silent
 end
 
 """
