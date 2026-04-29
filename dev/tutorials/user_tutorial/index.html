@@ -16,47 +16,48 @@ result = solve(problem, verbose = SolverVerbosity(Detailed()))
 # Maximum output - show everything
 result = solve(problem, verbose = SolverVerbosity(All()))</code></pre><h3 id="Custom-Verbosity-Configuration"><a class="docs-heading-anchor" href="#Custom-Verbosity-Configuration">Custom Verbosity Configuration</a><a id="Custom-Verbosity-Configuration-1"></a><a class="docs-heading-anchor-permalink" href="#Custom-Verbosity-Configuration" title="Permalink"></a></h3><p>For more control, you can configure individual message categories:</p><pre><code class="language-julia hljs"># Example: Customizing a solve&#39;s verbosity
 verbose_settings = SolverVerbosity(
-    initialization = InfoLevel(),      # Show startup messages
-    iterations = Silent(),             # Don&#39;t show each iteration
-    convergence = InfoLevel(),         # Show convergence information
-    error_control = WarnLevel()        # Show warnings related to error control of the solver
+    initialization = InfoLevel,      # Show startup messages
+    iterations = Silent,             # Don&#39;t show each iteration
+    convergence = InfoLevel,         # Show convergence information
+    error_control = WarnLevel        # Show warnings related to error control of the solver
 )
 
-result = solve(problem, verbose = verbose_settings)</code></pre><p><strong>Message Levels:</strong></p><ul><li><code>Silent()</code>: No output for this category</li><li><code>DebugLevel()</code>: Lowest priority debug messages</li><li><code>InfoLevel()</code>: Informational messages</li><li><code>WarnLevel()</code>: Warning messages</li><li><code>ErrorLevel()</code>: Error messages</li><li><code>CustomLevel(n)</code>: Custom level with integer value <code>n</code></li></ul><h2 id="Complete-Working-Example"><a class="docs-heading-anchor" href="#Complete-Working-Example">Complete Working Example</a><a id="Complete-Working-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Complete-Working-Example" title="Permalink"></a></h2><p>Here&#39;s a full example showing how SciMLLogging works in practice, using a simulated &quot;solver&quot;:</p><pre><code class="language-julia hljs">using SciMLLogging
-using SciMLLogging: None, Standard, All
-using ConcreteStructs: @concrete
+result = solve(problem, verbose = verbose_settings)</code></pre><p><strong>Message Levels:</strong></p><ul><li><code>Silent</code>: No output for this category</li><li><code>DebugLevel</code>: Lowest priority debug messages</li><li><code>InfoLevel</code>: Informational messages</li><li><code>WarnLevel</code>: Warning messages</li><li><code>ErrorLevel</code>: Error messages</li><li><code>MessageLevel(n)</code>: Custom level with integer value <code>n</code></li></ul><h2 id="Complete-Working-Example"><a class="docs-heading-anchor" href="#Complete-Working-Example">Complete Working Example</a><a id="Complete-Working-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Complete-Working-Example" title="Permalink"></a></h2><p>Here&#39;s a full example showing how SciMLLogging works in practice, using a simulated &quot;solver&quot;:</p><pre><code class="language-julia hljs">using SciMLLogging
+using SciMLLogging: None, Standard, All, AbstractVerbositySpecifier, MessageLevel
 
-# 1. Define a verbosity specifier (this would typically be done by a package)
-@concrete struct SolverVerbosity &lt;: AbstractVerbositySpecifier
-    initialization
-    iterations
-    convergence
-    linear_solve
-    warnings
+# 1. Define a verbosity specifier (this would typically be done by a package).
+#    The {Enabled} type parameter lets the compiler eliminate logging branches
+#    entirely when the specifier is disabled.
+struct SolverVerbosity{Enabled} &lt;: AbstractVerbositySpecifier{Enabled}
+    initialization::MessageLevel
+    iterations::MessageLevel
+    convergence::MessageLevel
+    linear_solve::MessageLevel
+    warnings::MessageLevel
 end
 
 # Likewise the constructors would typically be implemented by a package
 function SolverVerbosity(;
-    initialization = Info(),
-    iterations = Silent(),
-    convergence = InfoLevel(),
-    linear_solve = Silent(),
-    warnings = WarnLevel()
+    initialization = InfoLevel,
+    iterations = Silent,
+    convergence = InfoLevel,
+    linear_solve = Silent,
+    warnings = WarnLevel
     )
-    SolverVerbosity(initialization, iterations, convergence, linear_solve, warnings)
+    SolverVerbosity{true}(initialization, iterations, convergence, linear_solve, warnings)
 end
 
-# 2. Implement preset support
-function SolverVerbosity(preset::None)
-    SolverVerbosity(Silent(), Silent(), Silent(), Silent(), Silent())
+# 2. Implement preset support. None() returns a {false} instance — disabled at the type level.
+function SolverVerbosity(::None)
+    SolverVerbosity{false}(Silent, Silent, Silent, Silent, Silent)
 end
 
-function SolverVerbosity(preset::Standard)
-    SolverVerbosity(InfoLevel(), Silent(), InfoLevel(), Silent(), WarnLevel())
+function SolverVerbosity(::Standard)
+    SolverVerbosity{true}(InfoLevel, Silent, InfoLevel, Silent, WarnLevel)
 end
 
-function SolverVerbosity(preset::All)
-    SolverVerbosity(InfoLevel(), InfoLevel(), InfoLevel(), InfoLevel(), WarnLevel())
+function SolverVerbosity(::All)
+    SolverVerbosity{true}(InfoLevel, InfoLevel, InfoLevel, InfoLevel, WarnLevel)
 end
 
 # 3. Example solver function using SciMLLogging, the specific messages and where the messages are emitted
@@ -100,10 +101,10 @@ result3 = example_solver(problem, verbose = SolverVerbosity(None()))
 
 println(&quot;\n=== With custom verbosity ===&quot;)
 custom_verbose = SolverVerbosity(
-    initialization = InfoLevel(),
-    iterations = Silent(),
-    convergence = InfoLevel(),
-    linear_solve = InfoLevel(),
-    warnings = ErrorLevel()  # Treat warnings as errors for this run
+    initialization = InfoLevel,
+    iterations = Silent,
+    convergence = InfoLevel,
+    linear_solve = InfoLevel,
+    warnings = ErrorLevel  # Treat warnings as errors for this run
 )
-result4 = example_solver(problem, verbose = custom_verbose)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">&quot;Solution found&quot;</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../getting_started/">« Getting Started</a><a class="docs-footer-nextpage" href="../developer_tutorial/">Developer Guide »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Monday 27 April 2026 14:46">Monday 27 April 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+result4 = example_solver(problem, verbose = custom_verbose)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">&quot;Solution found&quot;</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../getting_started/">« Getting Started</a><a class="docs-footer-nextpage" href="../developer_tutorial/">Developer Guide »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Wednesday 29 April 2026 23:34">Wednesday 29 April 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

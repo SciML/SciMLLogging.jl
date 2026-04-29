@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "f89c271cf2d76c6a2a4adda2e705b338c177f2d9"
+project_hash = "f872dc7f060d5404aa60f59c5dd47545e465e5ae"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -65,9 +65,9 @@ version = "1.7.0"
 
 [[deps.Expat_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "9cb7fe11da6adb8683cbacf8aa9b5237941e3a75"
+git-tree-sha1 = "8f05e9a2e7c2e3eb524102bb2926c5743c07fbe1"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
-version = "2.7.5+0"
+version = "2.8.0+0"
 
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
@@ -110,9 +110,9 @@ version = "1.7.1"
 
 [[deps.JSON]]
 deps = ["Dates", "Logging", "Parsers", "PrecompileTools", "StructUtils", "UUIDs", "Unicode"]
-git-tree-sha1 = "67c6f1f085cb2671c93fe34244c9cccde30f7a26"
+git-tree-sha1 = "3e846e18560a65dcef26febd2ede0160c6831c1c"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
-version = "1.5.0"
+version = "1.5.1"
 
     [deps.JSON.extensions]
     JSONArrowExt = ["ArrowTypes"]
@@ -212,9 +212,9 @@ version = "10.44.0+1"
 
 [[deps.Parsers]]
 deps = ["Dates", "PrecompileTools", "UUIDs"]
-git-tree-sha1 = "7d2f8f21da5db6a806faf7b9b292296da42b2810"
+git-tree-sha1 = "5d5e0a78e971354b1c7bff0655d11fdc1b0e12c8"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.8.3"
+version = "2.8.4"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
@@ -264,9 +264,9 @@ version = "0.7.0"
 
 [[deps.SciMLLogging]]
 deps = ["Logging", "LoggingExtras", "Preferences"]
-path = "/home/runner/work/SciMLLogging.jl/SciMLLogging.jl"
+path = "/home/chrisrackauckas/github-runners/deepsea3-54/_work/SciMLLogging.jl/SciMLLogging.jl"
 uuid = "a6db7da4-7206-11f0-1eab-35f2a5dbe1d1"
-version = "1.9.1"
+version = "2.0.0"
 
     [deps.SciMLLogging.extensions]
     SciMLLoggingTracyExt = "Tracy"
