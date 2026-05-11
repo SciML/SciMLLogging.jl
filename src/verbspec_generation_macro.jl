@@ -47,10 +47,10 @@ end
 """
 macro verbosity_specifier(name, block)
     # Extract the assignments from the block
-    local toggles_expr        = nothing
+    local toggles_expr = nothing
     local sub_specifiers_expr = nothing
-    local presets_expr        = nothing
-    local groups_expr         = nothing
+    local presets_expr = nothing
+    local groups_expr = nothing
 
     if block.head == :block
         for ex in block.args

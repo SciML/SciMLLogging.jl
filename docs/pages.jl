@@ -1,7 +1,6 @@
 pages = [
     "Home" => "index.md",
     "Getting Started" => "getting_started.md",
-    "Forward Compatibility (1.10+ / 2.0)" => "forward_compat.md",
     "Tutorials" => [
         "User Guide" => "tutorials/user_tutorial.md",
         "Developer Guide" => "tutorials/developer_tutorial.md",

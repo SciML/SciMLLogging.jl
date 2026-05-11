@@ -87,3 +87,9 @@ The message levels have a natural hierarchy that affects logging behavior:
 - `CustomLevel(n)`: Priority determined by integer value `n`
 
 Higher priority messages are more likely to be displayed by logging systems, while lower priority messages may be filtered out depending on the logger configuration.
+
+## Forward-compatibility constructor
+
+```@docs
+MessageLevel(::Int)
+```

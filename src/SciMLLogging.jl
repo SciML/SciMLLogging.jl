@@ -13,7 +13,6 @@ include("verbspec_generation_macro.jl")
 export AbstractVerbositySpecifier, AbstractVerbosityPreset, AbstractMessageLevel
 export DebugLevel, InfoLevel, WarnLevel, ErrorLevel, CustomLevel, Silent
 export MessageLevel  # Forward-compat constructor for SciMLLogging 2.0 portability
-export is_enabled    # Forward-compat helper for portable disabled-path checks
 export @SciMLMessage
 export verbosity_to_int, verbosity_to_bool
 export SciMLLogger
