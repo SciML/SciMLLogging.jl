@@ -133,14 +133,14 @@ macro verbosity_specifier(name, block)
     custom_presets = filter(p -> !(p in standard_presets), preset_names)
 
     # Generate custom preset types
-    custom_preset_defs = [:(struct $p <: AbstractVerbosityPreset end) for p in custom_presets]
+    custom_preset_defs = [:(struct $p <: $(AbstractVerbosityPreset) end) for p in custom_presets]
 
     # Generate parametric struct
     type_params = [Symbol("T$i") for i in eachindex(toggles)]
     struct_fields = [:($(toggles[i])::$(type_params[i])) for i in eachindex(toggles)]
 
     struct_def = :(
-        struct $name{$(type_params...)} <: AbstractVerbositySpecifier
+        struct $name{$(type_params...)} <: $(AbstractVerbositySpecifier)
             $(struct_fields...)
         end
     )
@@ -185,7 +185,7 @@ macro verbosity_specifier(name, block)
         )
         push!(
             group_validations, quote
-                if $(group_name) !== nothing && !($(group_name) isa AbstractMessageLevel)
+                if $(group_name) !== nothing && !($(group_name) isa $(AbstractMessageLevel))
                     throw(ArgumentError($lazy_str))
                 end
             end
@@ -251,7 +251,7 @@ macro verbosity_specifier(name, block)
             $(group_validations...)
 
             # Validate preset
-            if preset !== nothing && !(preset isa AbstractVerbosityPreset)
+            if preset !== nothing && !(preset isa $(AbstractVerbosityPreset))
                 throw(ArgumentError($preset_error_str))
             end
 
@@ -260,13 +260,13 @@ macro verbosity_specifier(name, block)
                 if !(key in $(Tuple(toggles)))
                     throw(ArgumentError($unknown_option_str))
                 end
-                if !(value isa AbstractMessageLevel || value isa AbstractVerbosityPreset || value isa AbstractVerbositySpecifier)
+                if !(value isa $(AbstractMessageLevel) || value isa $(AbstractVerbosityPreset) || value isa $(AbstractVerbositySpecifier))
                     throw(ArgumentError($invalid_type_str))
                 end
             end
 
             # Get preset config
-            preset_to_use = preset === nothing ? Standard() : preset
+            preset_to_use = preset === nothing ? $(Standard)() : preset
             preset_config = $(Symbol("_preset_map_", name))[typeof(preset_to_use).name.name]
 
             # Apply precedence
