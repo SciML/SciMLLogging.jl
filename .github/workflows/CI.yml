@@ -12,15 +12,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 jobs:
-  test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.group }} - ${{ matrix.os }} - ${{ matrix.arch }}
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
-    env:
-      GROUP: ${{ matrix.group }}
-    permissions: # needed to allow julia-actions/cache to proactively delete old caches that it has created
-      actions: write
-      contents: read
+  tests:
+    name: "Tests"
     strategy:
       fail-fast: true
       matrix:
@@ -28,31 +21,18 @@ jobs:
           - '1'
           - 'lts'
           - 'pre'
-        os:
-          - ubuntu-latest
-        arch:
-          - x64
         group:
           - Core
         include:
           - version: '1'
-            os: ubuntu-latest
-            arch: x64
             group: NoPre
           - version: 'lts'
-            os: ubuntu-latest
-            arch: x64
             group: NoPre
           - version: '1'
-            os: ubuntu-latest
-            arch: x64
             group: Downstream
-    steps:
-      - uses: actions/checkout@v6
-      - uses: julia-actions/setup-julia@v3
-        with:
-          version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
-      - uses: julia-actions/cache@v3
-      - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-runtest@v1
+    uses: "SciML/.github/.github/workflows/tests.yml@v1"
+    with:
+      julia-version: "${{ matrix.version }}"
+      group: "${{ matrix.group }}"
+      coverage: false
+    secrets: "inherit"
