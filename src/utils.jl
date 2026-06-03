@@ -110,7 +110,7 @@ end
 
 
 """
-    `@SciMLMessage(message, verbosity::AbstracVerbositySpecifier, option::Symbol)`
+    `@SciMLMessage(message, verbosity::AbstractVerbositySpecifier, option::Symbol)`
     `@SciMLMessage(message, verbosity::Bool)`
 
 A macro that emits a log message based on the log level specified in the `option` of the `AbstractVerbositySpecifier` supplied.
