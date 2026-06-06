@@ -16,7 +16,7 @@ SciMLLoggingTracyExt = "Tracy"
 
 [compat]
 DocStringExtensions = "0.9.5"
-ExplicitImports = "1.10.3"
+ExplicitImports = "1.10.2"
 Logging = "1.1.0"
 LoggingExtras = "1.1.0"
 Preferences = "1.5.0"
