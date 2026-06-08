@@ -15,9 +15,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['1.10']
+        version: ['lts']
     uses: "SciML/.github/.github/workflows/downgrade.yml@v1"
     with:
       julia-version: "${{ matrix.version }}"
-      skip: "Pkg,TOML"
     secrets: "inherit"
