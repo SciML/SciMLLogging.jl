@@ -13,26 +13,7 @@ concurrency:
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 jobs:
   tests:
-    name: "Tests"
-    strategy:
-      fail-fast: true
-      matrix:
-        version:
-          - '1'
-          - 'lts'
-          - 'pre'
-        group:
-          - Core
-        include:
-          - version: '1'
-            group: NoPre
-          - version: 'lts'
-            group: NoPre
-          - version: '1'
-            group: Downstream
-    uses: "SciML/.github/.github/workflows/tests.yml@v1"
+    uses: "SciML/.github/.github/workflows/grouped-tests.yml@v1"
     with:
-      julia-version: "${{ matrix.version }}"
-      group: "${{ matrix.group }}"
       coverage: false
     secrets: "inherit"
