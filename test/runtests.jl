@@ -16,9 +16,9 @@ if GROUP == "Core" || GROUP == "All"
     @time @safetestset "Explicit Imports" include("explicit_imports.jl")
 end
 
-if (GROUP == "NoPre" || GROUP == "All") && isempty(VERSION.prerelease)
-    activate_env("nopre")
-    @time @safetestset "JET" include("nopre/jet.jl")
+if (GROUP == "QA" || GROUP == "All") && isempty(VERSION.prerelease)
+    activate_env("qa")
+    @time @safetestset "JET" include("qa/qa.jl")
 end
 
 if GROUP == "Downstream"
