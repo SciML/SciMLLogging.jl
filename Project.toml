@@ -16,22 +16,20 @@ SciMLLoggingTracyExt = "Tracy"
 
 [compat]
 DocStringExtensions = "0.9.5"
-ExplicitImports = "1.10.2"
 Logging = "1.1.0"
 LoggingExtras = "1.1.0"
 Preferences = "1.5.0"
 SafeTestsets = "0.1.0, 1"
-SciMLTesting = "1"
+SciMLTesting = "1.6"
 Test = "1"
 Tracy = "0.1"
 julia = "1.10"
 
 [extras]
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-ExplicitImports = "7d51a73a-1435-4ff3-83d9-f097790105c7"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 SciMLTesting = "09d9d899-5365-40a9-917a-5f67fddea283"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "SafeTestsets", "SciMLTesting", "DocStringExtensions", "ExplicitImports"]
+test = ["Test", "SafeTestsets", "SciMLTesting", "DocStringExtensions"]
