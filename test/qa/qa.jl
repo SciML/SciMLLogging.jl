@@ -1,10 +1,27 @@
-using SciMLLogging
+using SciMLTesting, SciMLLogging, Test
 using SciMLLogging: @SciMLMessage, @verbosity_specifier,
     Silent, InfoLevel, WarnLevel, ErrorLevel,
     None, Standard
 using JET
-using Test
 
+run_qa(
+    SciMLLogging; explicit_imports = true,
+    ei_kwargs = (;
+        # SciMLLogging integrates with the standard logging stack via Base/Core
+        # internals that are not (and cannot be made) public:
+        #   Core.println; Base.CoreLogging.{current_logger_for_env,shouldlog,handle_message}
+        # (src/utils.jl). `CoreLogging` is itself a non-public submodule of `Base`.
+        all_qualified_accesses_are_public = (;
+            ignore = (
+                :CoreLogging, :current_logger_for_env, :handle_message,
+                :println, :shouldlog,
+            ),
+        ),
+    )
+)
+
+# Functional inference regression test: emitting messages under a `None()` preset
+# must stay type-stable / allocation-free (no fallback to the dynamic logging path).
 @verbosity_specifier JETTestVerbosity begin
     toggles = (:a, :b, :c)
 
