@@ -1,11 +1,21 @@
 """
-    MessageLevel
+    MessageLevel(level::Integer)
 
-A concrete type representing a log message level, backed by an integer.
+Represent a log message severity, backed by an integer level.
 
 Higher integer values correspond to higher severity. The standard levels are
 available as constants: `Silent`, `DebugLevel`, `InfoLevel`, `WarnLevel`, `ErrorLevel`.
 Custom levels can be created with `MessageLevel(n)` for any integer `n`.
+
+# Fields
+
+- `level::Int`: Integer severity used when converting to backend-specific log levels.
+
+# Examples
+
+```julia
+MessageLevel(10)
+```
 """
 struct MessageLevel
     level::Int
@@ -14,35 +24,35 @@ end
 """
     Silent
 
-Log level that produces no output.
+`MessageLevel` that suppresses log emission.
 """
 const Silent = MessageLevel(0)
 
 """
     DebugLevel
 
-Debug log level. Corresponds to `Logging.Debug` when using the Logging backend.
+Debug `MessageLevel`. Corresponds to `Logging.Debug` when using the Logging backend.
 """
 const DebugLevel = MessageLevel(1)
 
 """
     InfoLevel
 
-Informational log level. Corresponds to `Logging.Info` when using the Logging backend.
+Informational `MessageLevel`. Corresponds to `Logging.Info` when using the Logging backend.
 """
 const InfoLevel = MessageLevel(2)
 
 """
     WarnLevel
 
-Warning log level. Corresponds to `Logging.Warn` when using the Logging backend.
+Warning `MessageLevel`. Corresponds to `Logging.Warn` when using the Logging backend.
 """
 const WarnLevel = MessageLevel(3)
 
 """
     ErrorLevel
 
-Error log level. Corresponds to `Logging.Error` when using the Logging backend.
+Error `MessageLevel`. Corresponds to `Logging.Error` when using the Logging backend.
 """
 const ErrorLevel = MessageLevel(4)
 
@@ -52,31 +62,37 @@ const ErrorLevel = MessageLevel(4)
 """
     AbstractVerbosityPreset
 
-Abstract base type for predefined verbosity configurations.
+Base type for predefined verbosity configurations.
 
 Presets provide convenient ways for users to configure verbosity without
 needing to specify individual message categories. Concrete subtypes include:
-- `None`: Disable all verbosity
-- `Minimal`: Only essential messages
-- `Standard`: Balanced verbosity for typical use
-- `Detailed`: Comprehensive verbosity for debugging
-- `All`: Enable all message categories
+
+# Presets
+
+- `None`: Disable all verbosity.
+- `Minimal`: Only essential messages.
+- `Standard`: Balanced verbosity for typical use.
+- `Detailed`: Comprehensive verbosity for debugging.
+- `All`: Enable all message categories.
 """
 abstract type AbstractVerbosityPreset end
 
 """
     None <: AbstractVerbosityPreset
 
-Preset that disables all verbosity. All message categories should be set to to `Silent`.
+Preset that disables all verbosity.
+
+All message categories should be set to `Silent`.
 """
 struct None <: AbstractVerbosityPreset end
 
 """
     Minimal <: AbstractVerbosityPreset
 
-Preset that shows only essential messages. Typically includes only warnings,
-errors, and critical status information while suppressing routine progress
-and debugging messages.
+Preset that shows only essential messages.
+
+Typically includes only warnings, errors, and critical status information while
+suppressing routine progress and debugging messages.
 
 This verbosity preset should set messages related to critical failures and
 errors that stop computation to `ErrorLevel`. Messages related to fatal issues
@@ -89,6 +105,7 @@ struct Minimal <: AbstractVerbosityPreset end
     Standard <: AbstractVerbosityPreset
 
 Preset that provides balanced verbosity suitable for typical usage.
+
 Shows important progress and status information without overwhelming
 the user with details.
 

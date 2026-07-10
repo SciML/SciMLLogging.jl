@@ -2,10 +2,14 @@
 const LOGGING_BACKEND = @load_preference("logging_backend", "logging")
 
 """
-    `AbstractVerbositySpecifier`
+    AbstractVerbositySpecifier{Enabled}
 
 Base for types which specify which log messages are emitted at what level.
-    
+
+# Type Parameters
+
+- `Enabled`: Boolean type parameter used to specialize enabled and disabled
+  verbosity configurations.
 """
 abstract type AbstractVerbositySpecifier{Enabled} end
 
@@ -110,20 +114,21 @@ end
 
 
 """
-    `@SciMLMessage(message, verbosity::AbstractVerbositySpecifier, option::Symbol)`
-    `@SciMLMessage(message, verbosity::Bool)`
+    @SciMLMessage(message, verbosity::AbstractVerbositySpecifier, option::Symbol[, kwargs...])
+    @SciMLMessage(message, verbosity::Bool[, kwargs...])
 
-A macro that emits a log message based on the log level specified in the `option` of the `AbstractVerbositySpecifier` supplied.
+Emit a log message controlled by a verbosity specifier or boolean flag.
 
-`f_or_message` may be a message String, or a 0-argument function that returns a String.
+`message` may be a string or a zero-argument function that returns a string.
 
-## Usage
+# Arguments
 
-To emit a simple string, `@SciMLMessage("message", verbosity, :option)` will emit a log message with the LogLevel specified in `verbosity` for the given `option`.
+- `message`: Message string or zero-argument message-producing function.
+- `verbosity`: `AbstractVerbositySpecifier` instance or `Bool` controlling emission.
+- `option`: Field name in `verbosity` that selects the message category.
+- `kwargs...`: Optional key-value metadata forwarded to Julia's logging system.
 
-`@SciMLMessage` can also be used to emit a log message coming from the evaluation of a 0-argument function. This function is resolved in the environment of the macro call.
-Therefore it can use variables from the surrounding environment. This may be useful if the log message writer wishes to carry out some calculations using existing variables
-and use them in the log message. The function is only called if the message category is not `Silent`, avoiding unnecessary computation.
+# Examples
 
 The macro works with any `AbstractVerbositySpecifier` implementation:
 
@@ -228,30 +233,30 @@ macro SciMLMessage(f_or_message, verb)
 end
 
 """
-        `verbosity_to_int(verb::MessageLevel)`
+    verbosity_to_int(verb::MessageLevel)
 
-    Takes a `MessageLevel` and gives a corresponding integer value.
-    Verbosity settings that use integers or enums that hold integers are relatively common.
-    This provides an interface so that these packages can be used with SciMLVerbosity. Each of the basic verbosity levels
-    are mapped to an integer.
+Convert a `MessageLevel` to its integer value.
 
-    ```julia
+This is useful when integrating with APIs that represent verbosity as an
+integer or integer-backed enum.
 
-    using SciMLLogging
+# Arguments
 
-    # Standard levels
+- `verb`: Message level to convert.
 
-    verbosity_to_int(Silent)        # Returns 0
-    verbosity_to_int(DebugLevel)    # Returns 1
-    verbosity_to_int(InfoLevel)     # Returns 2
-    verbosity_to_int(WarnLevel)     # Returns 3
-    verbosity_to_int(ErrorLevel)    # Returns 4
+# Returns
 
-    # Custom levels
+The integer severity for `verb`.
 
-    verbosity_to_int(MessageLevel(10)) # Returns 10
-    verbosity_to_int(MessageLevel(-5)) # Returns -5
-    ```
+# Examples
+
+```julia
+using SciMLLogging
+
+verbosity_to_int(Silent)           # returns 0
+verbosity_to_int(InfoLevel)        # returns 2
+verbosity_to_int(MessageLevel(10)) # returns 10
+```
 """
 function verbosity_to_int(verb::MessageLevel)
     verb == Silent     && return 0
@@ -263,38 +268,47 @@ function verbosity_to_int(verb::MessageLevel)
 end
 
 """
-        `verbosity_to_bool(verb::MessageLevel)`
+    verbosity_to_bool(verb::MessageLevel)
 
-    Takes a `MessageLevel` and gives a corresponding boolean value.
-    Verbosity settings that use booleans are relatively common.
-    This provides an interface so that these packages can be used with SciMLVerbosity.
-    If the verbosity is `Silent`, then `false` is returned. Otherwise, `true` is returned.
+Convert a `MessageLevel` to a boolean verbosity flag.
 
-    ```julia
-    using SciMLLogging
+`Silent` maps to `false`; every other message level maps to `true`.
 
-    # Silent returns false
-    verbosity_to_bool(Silent)        # Returns false
+# Arguments
 
-    # All other levels return true
-    verbosity_to_bool(InfoLevel)     # Returns true
-    verbosity_to_bool(WarnLevel)     # Returns true
-    verbosity_to_bool(ErrorLevel)    # Returns true
-    verbosity_to_bool(MessageLevel(5))  # Returns true
-    ```
+- `verb`: Message level to convert.
 
+# Returns
+
+`true` when `verb` emits messages, and `false` when it is `Silent`.
+
+# Examples
+
+```julia
+using SciMLLogging
+
+verbosity_to_bool(Silent)       # returns false
+verbosity_to_bool(WarnLevel)    # returns true
+verbosity_to_bool(MessageLevel(5))
+```
 """
 function verbosity_to_bool(verb::MessageLevel)
     return verb != Silent
 end
 
 """
-    `set_logging_backend(backend::String)``
+    set_logging_backend(backend::String)
 
-Set the logging backend preference. Valid options are:
-- "logging": Use Julia's standard Logging system (default)
-- "core": Use Core.println for simple output
-- "tracy": Use Tracy.jl tracymsg for profiling (requires Tracy.jl to be loaded)
+Set the logging backend preference.
+
+# Arguments
+
+- `backend`: Backend name. Valid values are `"logging"`, `"core"`, and `"tracy"`.
+
+# Returns
+
+Returns `nothing` after updating the preference, or throws `ArgumentError` for
+an invalid backend.
 
 Note: You must restart Julia for this preference change to take effect.
 """
@@ -308,9 +322,13 @@ function set_logging_backend(backend::String)
 end
 
 """
-    `get_logging_backend()`
+    get_logging_backend()
 
 Get the current logging backend preference.
+
+# Returns
+
+The configured backend name as a string.
 """
 function get_logging_backend()
     return @load_preference("logging_backend", "logging")
@@ -322,14 +340,19 @@ end
 Create a logger that routes messages to REPL and/or files based on log level.
 
 # Keyword Arguments
-- `debug_repl = false`: Show debug messages in REPL
-- `info_repl = true`: Show info messages in REPL
-- `warn_repl = true`: Show warnings in REPL
-- `error_repl = true`: Show errors in REPL
-- `debug_file = nothing`: File path for debug messages
-- `info_file = nothing`: File path for info messages
-- `warn_file = nothing`: File path for warnings
-- `error_file = nothing`: File path for errors
+
+- `debug_repl = false`: Show debug messages in the current logger.
+- `info_repl = true`: Show info messages in the current logger.
+- `warn_repl = true`: Show warnings in the current logger.
+- `error_repl = true`: Show errors in the current logger.
+- `debug_file = nothing`: File path for debug messages.
+- `info_file = nothing`: File path for info messages.
+- `warn_file = nothing`: File path for warnings.
+- `error_file = nothing`: File path for errors.
+
+# Returns
+
+A `LoggingExtras.TeeLogger` that routes each log level to the requested sinks.
 """
 function SciMLLogger(;
         debug_repl = false, info_repl = true, warn_repl = true, error_repl = true,
