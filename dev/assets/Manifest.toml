@@ -38,9 +38,9 @@ uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 version = "1.3.0+1"
 
 [[deps.ConcreteStructs]]
-git-tree-sha1 = "1988532cb3b4525bb718b99ba07e433bbf0e600b"
+git-tree-sha1 = "23a2ac1ab2a39460d4feecddf09b02e9019d6dd5"
 uuid = "2569d6c7-a4a2-43d3-a901-331e8e4be471"
-version = "0.2.5"
+version = "0.2.6"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -264,9 +264,9 @@ version = "0.7.0"
 
 [[deps.SciMLLogging]]
 deps = ["Logging", "LoggingExtras", "Preferences"]
-path = "/home/runner/work/SciMLLogging.jl/SciMLLogging.jl"
+path = "/home/runner/_work/SciMLLogging.jl/SciMLLogging.jl"
 uuid = "a6db7da4-7206-11f0-1eab-35f2a5dbe1d1"
-version = "2.0.2"
+version = "2.0.3"
 
     [deps.SciMLLogging.extensions]
     SciMLLoggingTracyExt = "Tracy"
