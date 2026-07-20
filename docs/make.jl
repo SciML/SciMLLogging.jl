@@ -23,7 +23,6 @@ makedocs(
     authors = "SciML",
     modules = [SciMLLogging],
     clean = true,
-    doctest = false,
     linkcheck = true,
     checkdocs = :exports,
     format = Documenter.HTML(

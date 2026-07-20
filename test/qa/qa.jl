@@ -5,8 +5,7 @@ using SciMLLogging: @SciMLMessage, @verbosity_specifier,
 using JET
 
 run_qa(
-    SciMLLogging; explicit_imports = true,
-    api_docs_kwargs = (; rendered = true),
+    SciMLLogging;
     ei_kwargs = (;
         # SciMLLogging integrates with the standard logging stack via Base/Core
         # internals that are not (and cannot be made) public:
