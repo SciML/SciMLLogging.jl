@@ -44,7 +44,7 @@ function Logging.handle_message(
         kwargs...
     )
     metadata = (; kwargs...)
-    push!(logger.records, (; level, message, _module, group, id, file, line, metadata))
+    return push!(logger.records, (; level, message, _module, group, id, file, line, metadata))
 end
 
 # Tests
