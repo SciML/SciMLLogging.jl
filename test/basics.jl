@@ -32,6 +32,21 @@ function TestVerbosity(preset::AbstractVerbosityPreset)
     end
 end
 
+struct CapturingLogger <: Logging.AbstractLogger
+    records::Vector{Any}
+end
+
+Logging.min_enabled_level(::CapturingLogger) = Logging.Debug
+Logging.shouldlog(::CapturingLogger, _...) = true
+
+function Logging.handle_message(
+        logger::CapturingLogger, level, message, _module, group, id, file, line;
+        kwargs...
+    )
+    metadata = (; kwargs...)
+    push!(logger.records, (; level, message, _module, group, id, file, line, metadata))
+end
+
 # Tests
 
 @testset "Basic tests" begin
@@ -51,6 +66,24 @@ end
         z = x + y
         "Test1: $z"
     end
+end
+
+@testset "Logging backend metadata" begin
+    logger = CapturingLogger(Any[])
+    verbose = TestVerbosity()
+    Logging.with_logger(logger) do
+        @SciMLMessage("captured", verbose, :test1, value = 42)
+    end
+
+    @test length(logger.records) == 1
+    record = only(logger.records)
+    @test record.level == Logging.Warn
+    @test record.message == "Verbosity toggle: test1 \n captured"
+    @test record._module === @__MODULE__
+    @test record.group == Symbol(basename(@__FILE__))
+    @test record.file isa String
+    @test record.line > 0
+    @test record.metadata.value == 42
 end
 
 @testset "Verbosity presets" begin
