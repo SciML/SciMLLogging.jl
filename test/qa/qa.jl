@@ -4,21 +4,7 @@ using SciMLLogging: @SciMLMessage, @verbosity_specifier,
     None, Standard
 using JET
 
-run_qa(
-    SciMLLogging;
-    ei_kwargs = (;
-        # SciMLLogging integrates with the standard logging stack via Base/Core
-        # internals that are not (and cannot be made) public:
-        #   Core.println; Base.CoreLogging.{current_logger_for_env,shouldlog,handle_message}
-        # (src/utils.jl). `CoreLogging` is itself a non-public submodule of `Base`.
-        all_qualified_accesses_are_public = (;
-            ignore = (
-                :CoreLogging, :current_logger_for_env, :handle_message,
-                :println, :shouldlog,
-            ),
-        ),
-    )
-)
+run_qa(SciMLLogging)
 
 # Functional inference regression test: emitting messages under a `None()` preset
 # must stay type-stable / allocation-free (no fallback to the dynamic logging path).

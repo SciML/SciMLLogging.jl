@@ -33,7 +33,7 @@ function emit_message(
     message = f()
     msg = "Verbosity toggle: $option \n $message"
     @static if LOGGING_BACKEND == "core"
-        Core.println(msg)
+        println(msg)
     elseif LOGGING_BACKEND == "tracy"
         emit_tracy_message(msg, level, file, line, _module)
     else
@@ -52,7 +52,7 @@ function emit_message(
 
     msg = "Verbosity toggle: $option \n $message"
     @static if LOGGING_BACKEND == "core"
-        Core.println(msg)
+        println(msg)
     elseif LOGGING_BACKEND == "tracy"
         emit_tracy_message(msg, level, file, line, _module)
     else
@@ -78,22 +78,12 @@ function emit_message(
     )
 end
 
-# Helper function to emit log messages using the lower-level Logging API
-# This allows us to pass kwargs dynamically at runtime
+# Helper function to emit log messages while preserving dynamic kwargs.
 function _emit_log(level, message, _module, file, line; kwargs...)
-    # Generate a unique id based on file and line (similar to what @logmsg does)
     id = Symbol(basename(file), "_", line)
     group = Symbol(basename(file))
 
-    # Get the appropriate logger
-    logger = Base.CoreLogging.current_logger_for_env(level, group, _module)
-
-    if logger !== nothing && Base.invokelatest(Base.CoreLogging.shouldlog, logger, level, _module, group, id)
-        Base.invokelatest(
-            Base.CoreLogging.handle_message,
-            logger, level, message, _module, group, id, file, line; kwargs...
-        )
-    end
+    Logging.@logmsg level message _module = _module _group = group _id = id _file = file _line = line kwargs...
     return nothing
 end
 
