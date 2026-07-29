@@ -53,7 +53,7 @@ result = solve(problem, verbose = custom_verbose)
 
 ## Logging Backends
 
-By default, SciMLLogging integrates with Julia's standard logging system, but there is also a backend that uses `Core.println` to emit messages. This is configurable via a [Preferences.jl](https://github.com/JuliaPackaging/Preferences.jl) preference setting.
+By default, SciMLLogging integrates with Julia's standard logging system, but there is also a backend that uses Julia's public `println` function to emit messages. This is configurable via a [Preferences.jl](https://github.com/JuliaPackaging/Preferences.jl) preference setting.
 
 ### Standard Julia Logging (Default)
 

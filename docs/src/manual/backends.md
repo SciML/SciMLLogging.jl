@@ -40,9 +40,11 @@ open("output.log", "w") do io
 end
 ```
 
-## Core Backend
+## Console Output Backend
 
-Uses `Core.println` for direct console output. Simpler but less flexible. This allows messages to emitted, while still being compatible with static compilation and JuliaC. 
+Uses Julia's public `println` function for direct console output. It is simpler
+but less flexible than the standard logging backend, while remaining compatible
+with static compilation and JuliaC.
 
 ## SciMLLogger
 
