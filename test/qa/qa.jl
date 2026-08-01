@@ -4,7 +4,20 @@ using SciMLLogging: @SciMLMessage, @verbosity_specifier,
     None, Standard
 using JET
 
-run_qa(SciMLLogging)
+# ExplicitImports only sees an extension module once its trigger package is loaded,
+# so load every weakdep here to bring SciMLLoggingTracyExt into the QA scan.
+using Tracy
+
+run_qa(
+    SciMLLogging;
+    ei_kwargs = (;
+        # SciMLLogging: `emit_tracy_message` is the backend hook stub declared in
+        # `src/utils.jl` for `SciMLLoggingTracyExt` to add a method to. It is internal
+        # plumbing rather than user API, so it is deliberately not public, and an
+        # extension has no other way to extend it.
+        all_qualified_accesses_are_public = (; ignore = (:emit_tracy_message,)),
+    )
+)
 
 # Functional inference regression test: emitting messages under a `None()` preset
 # must stay type-stable / allocation-free (no fallback to the dynamic logging path).

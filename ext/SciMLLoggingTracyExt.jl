@@ -2,7 +2,7 @@ module SciMLLoggingTracyExt
 
 using SciMLLogging
 using SciMLLogging: MessageLevel, DebugLevel, InfoLevel, WarnLevel, ErrorLevel
-using Tracy
+using Tracy: Tracy
 
 # Map MessageLevel values to Tracy color symbols
 function level_to_color(level::MessageLevel)
