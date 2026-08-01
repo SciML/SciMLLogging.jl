@@ -8,6 +8,12 @@ using JET
 # so load every weakdep here to bring SciMLLoggingTracyExt into the QA scan.
 using Tracy
 
+# ExplicitImports silently skips an extension that fails to load, so assert the
+# extension modules actually exist rather than trusting a green run_qa.
+@testset "Extensions loaded" begin
+    @test Base.get_extension(SciMLLogging, :SciMLLoggingTracyExt) !== nothing
+end
+
 run_qa(
     SciMLLogging;
     ei_kwargs = (;
