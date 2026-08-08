@@ -35,6 +35,12 @@ If you use SciMLLogging.jl in your research, please cite the SciML organization:
 
 See [Getting Started with SciMLLogging.jl](@ref) for a quick introduction to using SciMLLogging.jl.
 
+## Module
+
+```@docs
+SciMLLogging.SciMLLogging
+```
+
 ## Contributing 
 
 - Please refer to the [SciML ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://github.com/SciML/ColPrac/blob/master/README.md) for guidance on PRs, issues, and other matters relating to contributing to SciML.
