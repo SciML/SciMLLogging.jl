@@ -16,10 +16,9 @@ jobs:
           - {user: SciML, repo: NonlinearSolve.jl, group: Core}
           - {user: SciML, repo: OrdinaryDiffEq.jl, subdir: lib/DiffEqBase, group: Core}
           - {user: SciML, repo: OrdinaryDiffEq.jl, subdir: lib/DiffEqBase, group: Downstream}
-          - {user: SciML, repo: OrdinaryDiffEq.jl, subdir: lib/DiffEqBase, group: Downstream2}
-          - {user: SciML, repo: OrdinaryDiffEq.jl, group: Interface}
-          - {user: SciML, repo: OrdinaryDiffEq.jl, group: Integrators}
-          - {user: SciML, repo: OrdinaryDiffEq.jl, group: Regression}
+          - {user: SciML, repo: OrdinaryDiffEq.jl, group: InterfaceI}
+          - {user: SciML, repo: OrdinaryDiffEq.jl, group: Integrators_I}
+          - {user: SciML, repo: OrdinaryDiffEq.jl, group: Regression_I}
     uses: "SciML/.github/.github/workflows/downstream.yml@v1"
     with:
       owner: "${{ matrix.package.user }}"
