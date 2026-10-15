@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>User Guide · SciMLLogging.jl</title><meta name="title" content="User Guide · SciMLLogging.jl"/><meta property="og:title" content="User Guide · SciMLLogging.jl"/><meta property="twitter:title" content="User Guide · SciMLLogging.jl"/><meta name="description" content="Documentation for SciMLLogging.jl."/><meta property="og:description" content="Documentation for SciMLLogging.jl."/><meta property="twitter:description" content="Documentation for SciMLLogging.jl."/><meta property="og:url" content="https://docs.sciml.ai/SciMLLogging/stable/user_tutorial/"/><meta property="twitter:url" content="https://docs.sciml.ai/SciMLLogging/stable/user_tutorial/"/><link rel="canonical" href="https://docs.sciml.ai/SciMLLogging/stable/user_tutorial/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">SciMLLogging.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Tutorials</span><ul><li class="is-active"><a class="tocitem" href>User Guide</a><ul class="internal"><li><a class="tocitem" href="#Understanding-Verbosity-Specifiers"><span>Understanding Verbosity Specifiers</span></a></li><li><a class="tocitem" href="#Quick-Start"><span>Quick Start</span></a></li><li><a class="tocitem" href="#Understanding-Verbosity-Levels"><span>Understanding Verbosity Levels</span></a></li><li><a class="tocitem" href="#Common-Usage-Patterns"><span>Common Usage Patterns</span></a></li><li><a class="tocitem" href="#Working-with-Different-Output-Backends"><span>Working with Different Output Backends</span></a></li><li><a class="tocitem" href="#Redirecting-Output-to-Files"><span>Redirecting Output to Files</span></a></li><li><a class="tocitem" href="#Common-Scenarios"><span>Common Scenarios</span></a></li><li><a class="tocitem" href="#Package-Specific-Examples"><span>Package-Specific Examples</span></a></li><li><a class="tocitem" href="#Tips-and-Best-Practices"><span>Tips and Best Practices</span></a></li></ul></li><li><a class="tocitem" href="../developer_tutorial/">Developer Guide</a></li><li><a class="tocitem" href="../tutorial/">Complete Examples</a></li></ul></li><li><a class="tocitem" href="../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>User Guide</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>User Guide</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/SciML/SciMLLogging.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/SciML/SciMLLogging.jl/blob/main/docs/src/user_tutorial.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="User-Tutorial:-Configuring-Package-Verbosity"><a class="docs-heading-anchor" href="#User-Tutorial:-Configuring-Package-Verbosity">User Tutorial: Configuring Package Verbosity</a><a id="User-Tutorial:-Configuring-Package-Verbosity-1"></a><a class="docs-heading-anchor-permalink" href="#User-Tutorial:-Configuring-Package-Verbosity" title="Permalink"></a></h1><p>This tutorial is for end users who want to control the verbosity of packages that use SciMLLogging.jl. If you&#39;re using packages from the SciML ecosystem or other packages that support SciMLLogging. </p><p>Each package will have it&#39;s own implementation of the <code>AbstractVerbositySpecifier</code> type, which defines the available verbosity options. This guide is meant to be a general guide to the specifics of SciMLLogging.jl, as well as give some examples of how the system is typically implemented. For details on the specific verbosity settings of a package, refer to the package&#39;s documentation.</p><h2 id="Understanding-Verbosity-Specifiers"><a class="docs-heading-anchor" href="#Understanding-Verbosity-Specifiers">Understanding Verbosity Specifiers</a><a id="Understanding-Verbosity-Specifiers-1"></a><a class="docs-heading-anchor-permalink" href="#Understanding-Verbosity-Specifiers" title="Permalink"></a></h2><p>Before diving into usage, let&#39;s understand what a VerbositySpecifier looks like with a simple example. Typically, the <code>SolverVerbosity</code> type, would be implemented in a package like so:</p><pre><code class="language-julia hljs">using SciMLLogging
+
+# Example VerbositySpecifier from a hypothetical solver package
+struct SolverVerbosity{T} &lt;: AbstractVerbositySpecifier{T}
+    initialization::MessageLevel    # Controls startup messages
+    iterations::MessageLevel        # Controls per-iteration output
+    convergence::MessageLevel       # Controls convergence messages
+    warnings::MessageLevel          # Controls warning messages
+end</code></pre><p><strong>What this means:</strong></p><ul><li><strong><code>T</code> parameter</strong>: Controls whether logging is enabled (<code>T=true</code>) or disabled (<code>T=false</code>)</li><li><strong>Each field</strong>: Represents a category of messages the package can emit</li><li><strong>MessageLevel values</strong>: Can be <code>Silent()</code>, <code>InfoLevel()</code>, <code>WarnLevel()</code>, <code>ErrorLevel()</code>, or <code>CustomLevel(n)</code> for custom levels</li></ul><p>When <code>T=false</code>, all logging is disabled with zero runtime overhead. When <code>T=true</code>, each category can be individually controlled.</p><h2 id="Quick-Start"><a class="docs-heading-anchor" href="#Quick-Start">Quick Start</a><a id="Quick-Start-1"></a><a class="docs-heading-anchor-permalink" href="#Quick-Start" title="Permalink"></a></h2><p>Most packages that use SciMLLogging provide simple ways to control their verbosity:</p><pre><code class="language-julia hljs">using SomePackage  # A package that uses SciMLLogging
+
+# Default verbosity (usually shows important messages)
+result = solve_problem(problem)
+
+# Silent mode (no output)
+result = solve_problem(problem, verbose = None())
+
+# Verbose mode (show more details)
+result = solve_problem(problem, verbose = Detailed())</code></pre><h2 id="Understanding-Verbosity-Levels"><a class="docs-heading-anchor" href="#Understanding-Verbosity-Levels">Understanding Verbosity Levels</a><a id="Understanding-Verbosity-Levels-1"></a><a class="docs-heading-anchor-permalink" href="#Understanding-Verbosity-Levels" title="Permalink"></a></h2><p>SciMLLogging packages typically categorize their messages into different types:</p><ul><li><strong>Silent</strong>: No output at all</li><li><strong>InfoLevel</strong>: General informational messages</li><li><strong>WarnLevel</strong>: Warning messages about potential issues</li><li><strong>ErrorLevel</strong>: Error messages (usually still shown even in quiet modes)</li></ul><h2 id="Common-Usage-Patterns"><a class="docs-heading-anchor" href="#Common-Usage-Patterns">Common Usage Patterns</a><a id="Common-Usage-Patterns-1"></a><a class="docs-heading-anchor-permalink" href="#Common-Usage-Patterns" title="Permalink"></a></h2><h3 id="Using-Verbosity-Presets"><a class="docs-heading-anchor" href="#Using-Verbosity-Presets">Using Verbosity Presets</a><a id="Using-Verbosity-Presets-1"></a><a class="docs-heading-anchor-permalink" href="#Using-Verbosity-Presets" title="Permalink"></a></h3><p>Many packages provide preset verbosity levels:</p><pre><code class="language-julia hljs">using SciMLLogging  # To access preset types
+
+# Minimal output - only critical messages
+result = solve(problem, verbose = Minimal())
+
+# Maximum output - show everything
+result = solve(problem, verbose = All())
+
+# No output at all
+result = solve(problem, verbose = None())</code></pre><h3 id="Example-of-a-typical-AbstractVerbositySpecifier"><a class="docs-heading-anchor" href="#Example-of-a-typical-AbstractVerbositySpecifier">Example of a typical AbstractVerbositySpecifier</a><a id="Example-of-a-typical-AbstractVerbositySpecifier-1"></a><a class="docs-heading-anchor-permalink" href="#Example-of-a-typical-AbstractVerbositySpecifier" title="Permalink"></a></h3><p>Here&#39;s an example of how one might use a packages <code>AbstractVerbositySpecifier</code> implementation to control the output.</p><pre><code class="language-julia hljs"># Example: Customizing a solver&#39;s verbosity
+verbose_settings = SolverVerbosity{true}(
+    initialization = InfoLevel(),      # Show startup messages
+    iterations = Silent(),        # Don&#39;t show each iteration
+    convergence = InfoLevel(),         # Show when it converges
+    warnings = WarnLevel()            # Show warnings
+)
+
+result = solve(problem, verbose = verbose_settings)</code></pre><p><strong>Explanation of the example above:</strong></p><ul><li><code>SolverVerbosity{true}()</code> creates an enabled verbosity specifier</li><li><code>initialization = InfoLevel()</code> means startup messages will be shown as informational logs</li><li><code>iterations = Silent()</code> means iteration progress won&#39;t be shown at all</li><li><code>convergence = InfoLevel()</code> means convergence messages will be shown as informational logs</li><li><code>warnings = WarnLevel()</code> means warnings will be shown as warning-level logs</li></ul><h2 id="Working-with-Different-Output-Backends"><a class="docs-heading-anchor" href="#Working-with-Different-Output-Backends">Working with Different Output Backends</a><a id="Working-with-Different-Output-Backends-1"></a><a class="docs-heading-anchor-permalink" href="#Working-with-Different-Output-Backends" title="Permalink"></a></h2><h3 id="Standard-Julia-Logging"><a class="docs-heading-anchor" href="#Standard-Julia-Logging">Standard Julia Logging</a><a id="Standard-Julia-Logging-1"></a><a class="docs-heading-anchor-permalink" href="#Standard-Julia-Logging" title="Permalink"></a></h3><p>By default, messages go through Julia&#39;s standard logging system. You can control this with the logging level:</p><pre><code class="language-julia hljs">using Logging
+
+# Only show warnings and errors
+with_logger(ConsoleLogger(stderr, Logging.Warn)) do
+    result = solve_problem(problem, verbose = true)
+end
+
+# Show everything including debug messages
+with_logger(ConsoleLogger(stderr, Logging.Debug)) do
+    result = solve_problem(problem, verbose = true)
+end</code></pre><h3 id="Simple-Console-Output"><a class="docs-heading-anchor" href="#Simple-Console-Output">Simple Console Output</a><a id="Simple-Console-Output-1"></a><a class="docs-heading-anchor-permalink" href="#Simple-Console-Output" title="Permalink"></a></h3><p>Some packages may be configured to use simple console output instead of the logging system:</p><pre><code class="language-julia hljs">using SciMLLogging
+
+# Switch to simple Core.println output (if supported by the package)
+SciMLLogging.set_logging_backend(&quot;core&quot;)
+
+# Switch back to standard logging
+SciMLLogging.set_logging_backend(&quot;logging&quot;)</code></pre><p>Note: You need to restart Julia after changing the backend preference.</p><h2 id="Redirecting-Output-to-Files"><a class="docs-heading-anchor" href="#Redirecting-Output-to-Files">Redirecting Output to Files</a><a id="Redirecting-Output-to-Files-1"></a><a class="docs-heading-anchor-permalink" href="#Redirecting-Output-to-Files" title="Permalink"></a></h2><p>You can redirect verbose output to files using Julia&#39;s logging system:</p><pre><code class="language-julia hljs">using Logging
+
+# Save all output to a file
+open(&quot;solver_output.log&quot;, &quot;w&quot;) do io
+    with_logger(SimpleLogger(io)) do
+        result = solve_problem(problem, verbose = true)
+    end
+end
+
+# Or use the built-in SciMLLogger for more control
+using SciMLLogging
+
+logger = SciMLLogger(
+    info_repl = true,           # Show info in REPL
+    warn_repl = true,           # Show warnings in REPL
+    error_repl = true,          # Show errors in REPL
+    info_file = &quot;info.log&quot;,     # Save info messages to file
+    warn_file = &quot;warnings.log&quot;, # Save warnings to file
+    error_file = &quot;errors.log&quot;   # Save errors to file
+)
+
+with_logger(logger) do
+    result = solve_problem(problem, verbose = true)
+end</code></pre><h2 id="Common-Scenarios"><a class="docs-heading-anchor" href="#Common-Scenarios">Common Scenarios</a><a id="Common-Scenarios-1"></a><a class="docs-heading-anchor-permalink" href="#Common-Scenarios" title="Permalink"></a></h2><h3 id="Running-Experiments-Quietly"><a class="docs-heading-anchor" href="#Running-Experiments-Quietly">Running Experiments Quietly</a><a id="Running-Experiments-Quietly-1"></a><a class="docs-heading-anchor-permalink" href="#Running-Experiments-Quietly" title="Permalink"></a></h3><p>When running many experiments, you might want minimal output:</p><pre><code class="language-julia hljs">results = []
+for param in parameter_sweep
+    # Only show errors and critical information
+    result = solve_problem(param, verbose = Minimal())
+    push!(results, result)
+end</code></pre><h3 id="Debugging-Issues"><a class="docs-heading-anchor" href="#Debugging-Issues">Debugging Issues</a><a id="Debugging-Issues-1"></a><a class="docs-heading-anchor-permalink" href="#Debugging-Issues" title="Permalink"></a></h3><p>When troubleshooting problems, enable maximum verbosity:</p><pre><code class="language-julia hljs"># Show everything to understand what&#39;s happening
+result = solve_problem(problematic_case, verbose = All())
+
+# Or create custom settings to focus on specific aspects
+debug_verbose = SolverVerbosity{true}(
+    initialization = InfoLevel(),
+    iterations = InfoLevel(),        # Now show iterations for debugging
+    convergence = InfoLevel(),
+    warnings = WarnLevel()
+)
+
+result = solve_problem(problematic_case, verbose = debug_verbose)</code></pre><h3 id="Production-Runs"><a class="docs-heading-anchor" href="#Production-Runs">Production Runs</a><a id="Production-Runs-1"></a><a class="docs-heading-anchor-permalink" href="#Production-Runs" title="Permalink"></a></h3><p>For production environments, you might want only warnings and errors:</p><pre><code class="language-julia hljs"># Custom settings for production
+production_verbose = SolverVerbosity{true}(
+    initialization = Silent(),   # Don&#39;t show routine startup
+    iterations = Silent(),       # Don&#39;t show progress
+    convergence = Silent(),      # Don&#39;t show normal completion
+    warnings = WarnLevel()           # But do show problems
+)
+
+result = solve_problem(problem, verbose = production_verbose)</code></pre><h2 id="Package-Specific-Examples"><a class="docs-heading-anchor" href="#Package-Specific-Examples">Package-Specific Examples</a><a id="Package-Specific-Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Package-Specific-Examples" title="Permalink"></a></h2><h3 id="Solver-Packages"><a class="docs-heading-anchor" href="#Solver-Packages">Solver Packages</a><a id="Solver-Packages-1"></a><a class="docs-heading-anchor-permalink" href="#Solver-Packages" title="Permalink"></a></h3><p>Typical solver verbosity options:</p><pre><code class="language-julia hljs"># Show convergence info but not each iteration
+solver_verbose = SolverVerbosity{true}(
+    initialization = InfoLevel(),
+    iterations = Silent(),
+    convergence = InfoLevel(),
+    warnings = WarnLevel()
+)
+
+solution = solve(problem, solver_verbose)</code></pre><h3 id="Optimization-Packages"><a class="docs-heading-anchor" href="#Optimization-Packages">Optimization Packages</a><a id="Optimization-Packages-1"></a><a class="docs-heading-anchor-permalink" href="#Optimization-Packages" title="Permalink"></a></h3><p>Optimization packages might have different categories:</p><pre><code class="language-julia hljs"># Focus on optimization progress
+opt_verbose = OptimizerVerbosity{true}(
+    initialization = Silent(),
+    objective = InfoLevel(),      # Show objective function values
+    constraints = WarnLevel(),    # Show constraint violations
+    convergence = InfoLevel()
+)
+
+result = optimize(objective, constraints, opt_verbose)</code></pre><h2 id="Tips-and-Best-Practices"><a class="docs-heading-anchor" href="#Tips-and-Best-Practices">Tips and Best Practices</a><a id="Tips-and-Best-Practices-1"></a><a class="docs-heading-anchor-permalink" href="#Tips-and-Best-Practices" title="Permalink"></a></h2><h3 id="Finding-Available-Options"><a class="docs-heading-anchor" href="#Finding-Available-Options">Finding Available Options</a><a id="Finding-Available-Options-1"></a><a class="docs-heading-anchor-permalink" href="#Finding-Available-Options" title="Permalink"></a></h3><p>To see what verbosity options a package provides:</p><pre><code class="language-julia hljs"># Check the documentation
+?SolverVerbosity
+
+# Look at the default constructor
+SolverVerbosity()
+
+# Many packages document their verbosity categories</code></pre><h3 id="Testing-Your-Settings"><a class="docs-heading-anchor" href="#Testing-Your-Settings">Testing Your Settings</a><a id="Testing-Your-Settings-1"></a><a class="docs-heading-anchor-permalink" href="#Testing-Your-Settings" title="Permalink"></a></h3><p>Before long runs, test your verbosity settings on a small example:</p><pre><code class="language-julia hljs"># Test with a quick example first
+test_result = solve_problem(small_test_case, verbose_settings)
+
+# Then use the same settings for the full problem
+result = solve_problem(full_problem, verbose_settings)</code></pre><h3 id="Performance-Considerations"><a class="docs-heading-anchor" href="#Performance-Considerations">Performance Considerations</a><a id="Performance-Considerations-1"></a><a class="docs-heading-anchor-permalink" href="#Performance-Considerations" title="Permalink"></a></h3><ul><li>Using <code>verbose = false</code> or <code>None()</code> typically has zero runtime overhead</li><li>Custom verbosity settings have minimal overhead</li><li>File logging might slow down execution if there are many messages</li></ul><h3 id="Combining-with-Julia&#39;s-Built-in-Logging"><a class="docs-heading-anchor" href="#Combining-with-Julia&#39;s-Built-in-Logging">Combining with Julia&#39;s Built-in Logging</a><a id="Combining-with-Julia&#39;s-Built-in-Logging-1"></a><a class="docs-heading-anchor-permalink" href="#Combining-with-Julia&#39;s-Built-in-Logging" title="Permalink"></a></h3><p>You can combine package verbosity with Julia&#39;s logging filters:</p><pre><code class="language-julia hljs">using Logging
+
+# Package shows its messages, but Julia filters to only warnings+
+with_logger(ConsoleLogger(stderr, Logging.Warn)) do
+    result = solve_problem(problem, verbose = true)
+end</code></pre><p>This gives you both package-level control (what messages to generate) and system-level control (what messages to display).</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../developer_tutorial/">Developer Guide »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Thursday 25 September 2025 19:26">Thursday 25 September 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

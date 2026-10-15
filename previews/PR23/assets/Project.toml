@@ -1,0 +1,6 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+SciMLLogging = "a6db7da4-7206-11f0-1eab-35f2a5dbe1d1"
+
+[compat]
+Documenter = "1"
