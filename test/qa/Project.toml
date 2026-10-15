@@ -8,7 +8,7 @@ Tracy = "e689c965-62c8-4b79-b2c5-8359227902fd"
 
 [compat]
 Aqua = "0.8"
-JET = "0.9, 0.11"
+JET = "0.9, 0.11, 0.12"
 SciMLTesting = "2.4"
 Test = "1"
 Tracy = "0.1"
