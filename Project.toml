@@ -16,7 +16,7 @@ Tracy = "e689c965-62c8-4b79-b2c5-8359227902fd"
 SciMLLoggingTracyExt = "Tracy"
 
 [compat]
-DocStringExtensions = "0.9.5"
+DocStringExtensions = "0.9.5, 0.10"
 Logging = "1.1.0"
 LoggingExtras = "1.1.0"
 PrecompileTools = "1.2.1"
